@@ -52,7 +52,7 @@ The project implements a 4-tier pipeline:
 
 The language is formally defined using an Ecore metamodel. You can find the visual representation here:
 
-> **[View Class Diagram](./EclipseWorkSpace/org.example.quiz/model/generated/quizDSL class diagram.png)**
+[![QuizDSL Class Diagram](./EclipseWorkSpace/org.example.quiz/model/generated/quizDSL%20class%20diagram.png)](./EclipseWorkSpace/org.example.quiz/model/generated/quizDSL%20class%20diagram.png)
 
 The grammar supports:
 
