@@ -113,4 +113,4 @@ Access the dashboard at `http://localhost:5005`. Create a "New Model", enter you
 
 ---
 
-**Developed by Ali Soleimani** *Part of a Model-Driven Software Development Research Project.*
+**Developed by Ali Soleimani**
