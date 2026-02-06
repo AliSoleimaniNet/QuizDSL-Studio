@@ -1,0 +1,801 @@
+FROM gemma3:12b
+
+# 1. تنظیمات حافظه و توکن‌ها (بسیار مهم برای خروجی طولانی)
+PARAMETER temperature 0.0
+PARAMETER num_ctx 65536
+PARAMETER num_predict 30000
+PARAMETER repeat_penalty 1.15
+PARAMETER top_k 40
+PARAMETER top_p 0.9
+
+# 2. استاپ توکن‌ها برای جلوگیری از قاطی کردن نقش‌ها
+PARAMETER stop "user:"
+PARAMETER stop "assistant:"
+
+SYSTEM """
+You are a High-Performance Compiler Generator for QuizDSL.
+Your goal is to generate VALID, COMPLETE, and COMPILABLE code based on the user's request.
+
+GRAMMAR RULES (Do not deviate):
+- Theme: theme ID primary "..." secondary "..." bg "..." text "..." font "..." end
+- User: user ID uid "..." pwd "..." name "..." [admin|student] end
+- Platform: platform ID title "..." subtitle "..." logo "..." use_theme [ThemeID] quizzes... end
+- Quiz: quiz ID label "..." desc "..." icon "..." [public|private] [time INT min] [start "..."] [end "..."] [shuffle] [show_result] [score INT] questions... end
+- Questions (MUST use 'end' to close):
+  * single_choice ID text "..." val INT options (ID -> "...")... correct [OptionID] end
+  * multi_choice ID text "..." val INT options (ID -> "...")... end
+  * true_false ID text "..." val INT answer [true|false] end
+  * descriptive ID text "..." val INT end
+
+ABSOLUTE COMMANDS:
+1. NO LAZINESS: You MUST generate EVERY single question requested.
+2. NO PLACEHOLDERS: Never use "..." or comments.
+3. NO PROSE: Output ONLY the QuizDSL code. No intro, no outro, no explanations.
+4. SYNTAX: Ensure every 'quiz', 'platform', and 'question' block ends with 'end'.
+5. STRICT NAMING CONVENTION (MANDATORY):
+   - Question ID: Must be [QuizID]_q[N] (e.g., MathQuiz_q1).
+   - Option ID: Must be [QuizID]_q[N]_o[M] (e.g., MathQuiz_q1_o1).
+   - You must NOT use simple q1 or o1. Every ID must be prefixed with the Quiz ID.
+6. SCORING LOGIC: Total score of a quiz must equal the sum of 'val' of all its questions."""
+
+
+MESSAGE user "یک پلتفرم برای 'آکادمی علوم' بساز. تم ساینتس (آبی/سفید). ادمین (دکتر کمالی). پلتفرم شامل یک آزمون جامع 'اطلاعات عمومی' با ۲۵ سوال متنوع (تستی، صحیح غلط، تشریحی) باشد. تمام ۲۵ سوال را کامل بنویس."
+
+MESSAGE assistant """theme ScienceTheme
+    primary "#2563EB"
+    secondary "#1E40AF"
+    bg "#FFFFFF"
+    text "#1F2937"
+    font "Vazir"
+end
+
+user DrKamali
+    uid "admin_science"
+    pwd "science2026"
+    name "دکتر کمالی"
+    admin
+end
+
+platform ScienceAcademy
+    title "آکادمی علوم ایران"
+    subtitle "مرکز سنجش دانش عمومی"
+    logo "atom.png"
+    use_theme ScienceTheme
+
+    quiz GeneralKnowledge
+        label "آزمون جامع علوم"
+        desc "سنجش اطلاعات در حوزه‌های فیزیک، شیمی و زیست"
+        icon "flask.png"
+        public
+        time 60 min
+        shuffle
+        show_result
+        score 100
+
+        single_choice GeneralKnowledge_q1
+            text "فرمول شیمیایی آب چیست؟"
+            val 4
+            options
+                GeneralKnowledge_q1_o1 -> "H2O"
+                GeneralKnowledge_q1_o2 -> "CO2"
+                GeneralKnowledge_q1_o3 -> "O2"
+            correct GeneralKnowledge_q1_o1
+        end
+
+        true_false GeneralKnowledge_q2
+            text "آیا سرعت نور بیشتر از سرعت صوت است؟"
+            val 4
+            answer true
+        end
+
+        single_choice GeneralKnowledge_q3
+            text "سیاره سرخ منظومه شمسی کدام است؟"
+            val 4
+            options
+                GeneralKnowledge_q3_o1 -> "زمین"
+                GeneralKnowledge_q3_o2 -> "مریخ"
+                GeneralKnowledge_q3_o3 -> "مشتری"
+            correct GeneralKnowledge_q3_o2
+        end
+
+        descriptive GeneralKnowledge_q4
+            text "قانون جاذبه نیوتون را تعریف کنید."
+            val 4
+        end
+
+        multi_choice GeneralKnowledge_q5
+            text "کدام موارد از حالات ماده هستند؟"
+            val 4
+            options
+                GeneralKnowledge_q5_o1 -> "جامد"
+                GeneralKnowledge_q5_o2 -> "مایع"
+                GeneralKnowledge_q5_o3 -> "گاز"
+                GeneralKnowledge_q5_o4 -> "انرژی"
+            end
+
+        true_false GeneralKnowledge_q6
+            text "آیا انسان می‌تواند بدون اکسیژن زنده بماند؟"
+            val 4
+            answer false
+        end
+
+        single_choice GeneralKnowledge_q7
+            text "پایتخت کشور فرانسه کدام است؟"
+            val 4
+            options
+                GeneralKnowledge_q7_o1 -> "لندن"
+                GeneralKnowledge_q7_o2 -> "برلین"
+                GeneralKnowledge_q7_o3 -> "پاریس"
+            correct GeneralKnowledge_q7_o3
+        end
+
+        single_choice GeneralKnowledge_q8
+            text "بزرگترین اقیانوس جهان کدام است؟"
+            val 4
+            options
+                GeneralKnowledge_q8_o1 -> "اطلس"
+                GeneralKnowledge_q8_o2 -> "آرام"
+                GeneralKnowledge_q8_o3 -> "هند"
+            correct GeneralKnowledge_q8_o2
+        end
+
+        true_false GeneralKnowledge_q9
+            text "آیا عنکبوت‌ها حشره هستند؟"
+            val 4
+            answer false
+        end
+
+        descriptive GeneralKnowledge_q10
+            text "فرآیند فتوسنتز را به اختصار شرح دهید."
+            val 4
+        end
+
+        single_choice GeneralKnowledge_q11
+            text "کدام فلز در دمای اتاق مایع است؟"
+            val 4
+            options
+                GeneralKnowledge_q11_o1 -> "آهن"
+                GeneralKnowledge_q11_o2 -> "جیوه"
+                GeneralKnowledge_q11_o3 -> "طلا"
+            correct GeneralKnowledge_q11_o2
+        end
+
+        multi_choice GeneralKnowledge_q12
+            text "کدام حیوانات پستاندار هستند؟"
+            val 4
+            options
+                GeneralKnowledge_q12_o1 -> "نهنگ"
+                GeneralKnowledge_q12_o2 -> "خفاش"
+                GeneralKnowledge_q12_o3 -> "کوسه"
+            end
+
+        true_false GeneralKnowledge_q13
+            text "دمای جوش آب ۱۰۰ درجه سانتی‌گراد است."
+            val 4
+            answer true
+        end
+
+        single_choice GeneralKnowledge_q14
+            text "مخترع لامپ کیست؟"
+            val 4
+            options
+                GeneralKnowledge_q14_o1 -> "تسلا"
+                GeneralKnowledge_q14_o2 -> "ادیسون"
+                GeneralKnowledge_q14_o3 -> "بل"
+            correct GeneralKnowledge_q14_o2
+        end
+
+        single_choice GeneralKnowledge_q15
+            text "واحد اندازه‌گیری جریان الکتریکی چیست؟"
+            val 4
+            options
+                GeneralKnowledge_q15_o1 -> "ولت"
+                GeneralKnowledge_q15_o2 -> "آمپر"
+                GeneralKnowledge_q15_o3 -> "اهم"
+            correct GeneralKnowledge_q15_o2
+        end
+
+        true_false GeneralKnowledge_q16
+            text "آیا DNA حامل اطلاعات ژنتیکی است؟"
+            val 4
+            answer true
+        end
+
+        descriptive GeneralKnowledge_q17
+            text "تفاوت بین ویروس و باکتری را بنویسید."
+            val 4
+        end
+
+        single_choice GeneralKnowledge_q18
+            text "کدام گاز بیشترین درصد جو زمین را تشکیل می‌دهد؟"
+            val 4
+            options
+                GeneralKnowledge_q18_o1 -> "اکسیژن"
+                GeneralKnowledge_q18_o2 -> "نیتروژن"
+                GeneralKnowledge_q18_o3 -> "دی‌اکسید کربن"
+            correct GeneralKnowledge_q18_o2
+        end
+
+        single_choice GeneralKnowledge_q19
+            text "سخت‌ترین ماده طبیعی چیست؟"
+            val 4
+            options
+                GeneralKnowledge_q19_o1 -> "فولاد"
+                GeneralKnowledge_q19_o2 -> "الماس"
+                GeneralKnowledge_q19_o3 -> "گرانیت"
+            correct GeneralKnowledge_q19_o2
+        end
+
+        true_false GeneralKnowledge_q20
+            text "آیا خورشید به دور زمین می‌چرخد؟"
+            val 4
+            answer false
+        end
+
+        multi_choice GeneralKnowledge_q21
+            text "کدام موارد انرژی تجدیدپذیر هستند؟"
+            val 4
+            options
+                GeneralKnowledge_q21_o1 -> "خورشیدی"
+                GeneralKnowledge_q21_o2 -> "بادی"
+                GeneralKnowledge_q21_o3 -> "زغال سنگ"
+            end
+
+        single_choice GeneralKnowledge_q22
+            text "عدد پی (pi) تقریباً چقدر است؟"
+            val 4
+            options
+                GeneralKnowledge_q22_o1 -> "3.14"
+                GeneralKnowledge_q22_o2 -> "3.12"
+                GeneralKnowledge_q22_o3 -> "3.16"
+            correct GeneralKnowledge_q22_o1
+        end
+
+        true_false GeneralKnowledge_q23
+            text "آیا قلب انسان ۴ حفره دارد؟"
+            val 4
+            answer true
+        end
+
+        single_choice GeneralKnowledge_q24
+            text "کدام ویتامین با نور خورشید ساخته می‌شود؟"
+            val 4
+            options
+                GeneralKnowledge_q24_o1 -> "ویتامین C"
+                GeneralKnowledge_q24_o2 -> "ویتامین D"
+                GeneralKnowledge_q24_o3 -> "ویتامین A"
+            correct GeneralKnowledge_q24_o2
+        end
+
+        single_choice GeneralKnowledge_q25
+            text "واحد پول ژاپن چیست؟"
+            val 4
+            options
+                GeneralKnowledge_q25_o1 -> "یوان"
+                GeneralKnowledge_q25_o2 -> "ین"
+                GeneralKnowledge_q25_o3 -> "وون"
+            correct GeneralKnowledge_q25_o2
+        end
+    end
+end"""
+
+
+MESSAGE user "یک سیستم جامع برای 'آکادمی فناوری' بساز. دو تم (روشن و تیره)، ادمین 'مهندس راد' و دانشجو 'نیما'. پلتفرم 'TechAcademy' شامل ۵ آزمون باشد: طراحی وب، شبکه، هوش مصنوعی، امنیت و پایگاه داده. هر آزمون باید دقیقاً ۱۰ سوال متنوع داشته باشد. هیچ سوالی را جا نینداز."
+
+MESSAGE assistant """theme LightMode primary "#3B82F6" secondary "#10B981" bg "#FFFFFF" text "#111827" font "Vazir" end
+theme DarkMode primary "#60A5FA" secondary "#34D399" bg "#111827" text "#F9FAFB" font "Vazir" end
+
+user AdminRad uid "rad_admin" pwd "admin@tech" name "مهندس راد" admin end
+user StudentNima uid "nima_user" pwd "nima1234" name "نیما حسینی" student end
+
+platform TechAcademy
+    title "آکادمی فناوری اطلاعات"
+    subtitle "مرکز آموزش تخصصی مهارت‌های نوین"
+    logo "tech_logo.png"
+    use_theme DarkMode
+
+    # --- QUIZ 1: WebDev ---
+    quiz WebDev label "طراحی وب" desc "مفاهیم HTML, CSS و JS" icon "web.png" public time 15 min score 100
+        single_choice WebDev_q1 text "تگ بدنه اصلی HTML چیست؟" val 10 options WebDev_q1_o1 -> "body" WebDev_q1_o2 -> "head" correct WebDev_q1_o1 end
+        true_false WebDev_q2 text "آیا CSS برای ساختاردهی استفاده می‌شود؟" val 10 answer false end
+        single_choice WebDev_q3 text "کدام تگ برای لینک استفاده می‌شود؟" val 10 options WebDev_q3_o1 -> "a" WebDev_q3_o2 -> "link" correct WebDev_q3_o1 end
+        multi_choice WebDev_q4 text "کدام‌ها فریم‌ورک جاوااسکریپت هستند؟" val 10 options WebDev_q4_o1 -> "React" WebDev_q4_o2 -> "Vue" WebDev_q4_o3 -> "Django" end
+        descriptive WebDev_q5 text "تفاوت ID و Class در CSS چیست؟" val 10 end
+        true_false WebDev_q6 text "جاوااسکریپت زبان سمت سرور هم هست؟" val 10 answer true end
+        single_choice WebDev_q7 text "کدام واحد در CSS نسبی است؟" val 10 options WebDev_q7_o1 -> "px" WebDev_q7_o2 -> "em" correct WebDev_q7_o2 end
+        single_choice WebDev_q8 text "تگ برای تیتر اصلی چیست؟" val 10 options WebDev_q8_o1 -> "h1" WebDev_q8_o2 -> "p" correct WebDev_q8_o1 end
+        true_false WebDev_q9 text "آیا HTML5 از ویدیو پشتیبانی می‌کند؟" val 10 answer true end
+        descriptive WebDev_q10 text "مفهوم Responsive Design را شرح دهید." val 10 end
+    end
+
+    # --- QUIZ 2: Network ---
+    quiz Network label "شبکه" desc "مبانی سیسکو و لایه‌ها" icon "net.png" private time 20 min score 100
+        single_choice Network_q1 text "لایه اول OSI چیست؟" val 10 options Network_q1_o1 -> "فیزیکی" Network_q1_o2 -> "شبکه" correct Network_q1_o1 end
+        true_false Network_q2 text "آیا IP لایه ۲ است؟" val 10 answer false end
+        single_choice Network_q3 text "پروتکل HTTP از کدام پورت استفاده می‌کند؟" val 10 options Network_q3_o1 -> "80" Network_q3_o2 -> "443" correct Network_q3_o1 end
+        multi_choice Network_q4 text "کدام‌ها پروتکل مسیریابی هستند؟" val 10 options Network_q4_o1 -> "OSPF" Network_q4_o2 -> "BGP" Network_q4_o3 -> "TCP" end
+        descriptive Network_q5 text "وظیفه روتر را توضیح دهید." val 10 end
+        true_false Network_q6 text "آیا MAC Address جهانی است؟" val 10 answer true end
+        single_choice Network_q7 text "کابل شبکه استاندارد چیست؟" val 10 options Network_q7_o1 -> "Cat6" Network_q7_o2 -> "Coaxial" correct Network_q7_o1 end
+        single_choice Network_q8 text "لایه انتقال کدام است؟" val 10 options Network_q8_o1 -> "لایه ۴" Network_q8_o2 -> "لایه ۳" correct Network_q8_o1 end
+        true_false Network_q9 text "پروتکل UDP اتصال‌گرا است؟" val 10 answer false end
+        descriptive Network_q10 text "تفاوت سوئیچ و هاب چیست؟" val 10 end
+    end
+
+    # --- QUIZ 3: AI ---
+    quiz AI label "هوش مصنوعی" desc "یادگیری ماشین و عمیق" icon "ai.png" public score 100
+        single_choice AI_q1 text "پدر هوش مصنوعی کیست؟" val 10 options AI_q1_o1 -> "آلن تورینگ" AI_q1_o2 -> "ایلان ماسک" correct AI_q1_o1 end
+        true_false AI_q2 text "آیا شبکه عصبی از مغز الهام گرفته؟" val 10 answer true end
+        single_choice AI_q3 text "کتابخانه معروف پایتون برای AI؟" val 10 options AI_q3_o1 -> "TensorFlow" AI_q3_o2 -> "Flask" correct AI_q3_o1 end
+        multi_choice AI_q4 text "الگوریتم‌های کلاسبندی کدامند؟" val 10 options AI_q4_o1 -> "SVM" AI_q4_o2 -> "KNN" AI_q4_o3 -> "K-Means" end
+        descriptive AI_q5 text "یادگیری نظارت شده چیست؟" val 10 end
+        true_false AI_q6 text "آیا رگرسیون برای داده‌های گسسته است؟" val 10 answer false end
+        single_choice AI_q7 text "زبان اصلی علم داده چیست؟" val 10 options AI_q7_o1 -> "Python" AI_q7_o2 -> "C#" correct AI_q7_o1 end
+        single_choice AI_q8 text "مفهوم Overfitting چیست؟" val 10 options AI_q8_o1 -> "بیش‌برازش" AI_q8_o2 -> "کم‌برازش" correct AI_q8_o1 end
+        true_false AI_q9 text "آیا هوش مصنوعی عمومی ساخته شده؟" val 10 answer false end
+        descriptive AI_q10 text "کاربرد NLP را بنویسید." val 10 end
+    end
+
+    # --- QUIZ 4: Security ---
+    quiz Security label "امنیت" desc "هک و نفوذ" icon "sec.png" private time 30 min score 100
+        single_choice Security_q1 text "حمله DDoS چیست؟" val 10 options Security_q1_o1 -> "عدم سرویس‌دهی" Security_q1_o2 -> "سرقت هویت" correct Security_q1_o1 end
+        true_false Security_q2 text "آیا HTTPS امن‌تر از HTTP است؟" val 10 answer true end
+        single_choice Security_q3 text "پروتکل SSH روی چه پورتی است؟" val 10 options Security_q3_o1 -> "22" Security_q3_o2 -> "23" correct Security_q3_o1 end
+        multi_choice Security_q4 text "روش‌های احراز هویت کدامند؟" val 10 options Security_q4_o1 -> "رمز عبور" Security_q4_o2 -> "اثر انگشت" Security_q4_o3 -> "IP" end
+        descriptive Security_q5 text "مهندسی اجتماعی را تعریف کنید." val 10 end
+        true_false Security_q6 text "آیا فایروال لایه ۷ هم داریم؟" val 10 answer true end
+        single_choice Security_q7 text "کدام آنتی ویروس بهتر است؟" val 10 options Security_q7_o1 -> "Kaspersky" Security_q7_o2 -> "Windows Defender" correct Security_q7_o1 end
+        single_choice Security_q8 text "هش کردن رمز یعنی چه؟" val 10 options Security_q8_o1 -> "رمزنگاری یک‌طرفه" Security_q8_o2 -> "فشرده‌سازی" correct Security_q8_o1 end
+        true_false Security_q9 text "آیا لینوکس ویروس نمی‌گیرد؟" val 10 answer false end
+        descriptive Security_q10 text "تفاوت هکر کلاه سفید و سیاه چیست؟" val 10 end
+    end
+
+    # --- QUIZ 5: Database ---
+    quiz Database label "پایگاه داده" desc "SQL و مفاهیم رابطه‌ای" icon "db.png" public score 100
+        single_choice Database_q1 text "دستور انتخاب داده چیست؟" val 10 options Database_q1_o1 -> "SELECT" Database_q1_o2 -> "GET" correct Database_q1_o1 end
+        true_false Database_q2 text "آیا کلید خارجی تکراری می‌شود؟" val 10 answer true end
+        single_choice Database_q3 text "کدام دستور رکورد را حذف می‌کند؟" val 10 options Database_q3_o1 -> "DELETE" Database_q3_o2 -> "DROP" correct Database_q3_o1 end
+        multi_choice Database_q4 text "پایگاه داده‌های NoSQL کدامند؟" val 10 options Database_q4_o1 -> "MongoDB" Database_q4_o2 -> "Redis" Database_q4_o3 -> "MySQL" end
+        descriptive Database_q5 text "نرمال‌سازی چیست؟" val 10 end
+        true_false Database_q6 text "آیا SQL یک زبان ساختاریافته است؟" val 10 answer true end
+        single_choice Database_q7 text "کلید اصلی باید چه ویژگی داشته باشد؟" val 10 options Database_q7_o1 -> "یکتا" Database_q7_o2 -> "رشته‌ای" correct Database_q7_o1 end
+        single_choice Database_q8 text "دستور ایجاد جدول چیست؟" val 10 options Database_q8_o1 -> "CREATE" Database_q8_o2 -> "NEW" correct Database_q8_o1 end
+        true_false Database_q9 text "آیا تراکنش‌ها ACID هستند؟" val 10 answer true end
+        descriptive Database_q10 text "مفهوم Join را در SQL بنویسید." val 10 end
+    end
+end"""
+
+MESSAGE user "یک پلتفرم برای 'آکادمی سلامت' بساز. تم سبز، ادمین 'دکتر علوی'. شامل ۳ آزمون: کالبدشناسی، فوریت‌های پزشکی و تغذیه. هر آزمون باید دقیقاً ۱۵ سوال داشته باشد. تمام کد را کامل و بدون حذف بنویس."
+
+MESSAGE assistant """theme MedicalTheme primary "#059669" secondary "#10B981" bg "#F0FDF4" text "#064E3B" font "Tahoma" end
+
+user DrAlavi uid "alavi_med" pwd "health2026" name "دکتر علوی" admin end
+
+platform HealthAcademy
+    title "آکادمی جامع سلامت"
+    subtitle "مرکز آموزش و آزمون‌های پزشکی"
+    logo "health_logo.png"
+    use_theme MedicalTheme
+
+    # --- QUIZ 1: Anatomy ---
+    quiz Anatomy label "کالبدشناسی" desc "ساختار بدن انسان" icon "heart.png" private time 30 min score 100
+        single_choice Anatomy_q1 text "بزرگترین استخوان بدن؟" val 6 options Anatomy_q1_o1 -> "ران" Anatomy_q1_o2 -> "بازو" correct Anatomy_q1_o1 end
+        true_false Anatomy_q2 text "قلب انسان ۴ حفره دارد؟" val 6 answer true end
+        single_choice Anatomy_q3 text "تعداد مهره‌های گردن؟" val 6 options Anatomy_q3_o1 -> "۷" Anatomy_q3_o2 -> "۱۲" correct Anatomy_q3_o1 end
+        multi_choice Anatomy_q4 text "اندام‌های حیاتی کدامند؟" val 6 options Anatomy_q4_o1 -> "مغز" Anatomy_q4_o2 -> "قلب" Anatomy_q4_o3 -> "آپاندیس" end
+        descriptive Anatomy_q5 text "وظیفه کبد چیست؟" val 10 end
+        true_false Anatomy_q6 text "معده در سمت راست بدن است؟" val 6 answer false end
+        single_choice Anatomy_q7 text "بزرگترین غده بدن؟" val 6 options Anatomy_q7_o1 -> "تیروئید" Anatomy_q7_o2 -> "کبد" correct Anatomy_q7_o2 end
+        single_choice Anatomy_q8 text "پوشش محافظ قلب؟" val 6 options Anatomy_q8_o1 -> "پریکارد" Anatomy_q8_o2 -> "پلور" correct Anatomy_q8_o1 end
+        true_false Anatomy_q9 text "خون در سیاهرگ اکسیژن کمی دارد؟" val 6 answer true end
+        multi_choice Anatomy_q10 text "انواع گلبول‌ها کدامند؟" val 6 options Anatomy_q10_o1 -> "سفید" Anatomy_q10_o2 -> "قرمز" Anatomy_q10_o3 -> "سیاه" end
+        single_choice Anatomy_q11 text "رنگدانه مو؟" val 6 options Anatomy_q11_o1 -> "ملانین" Anatomy_q11_o2 -> "کراتین" correct Anatomy_q11_o1 end
+        true_false Anatomy_q12 text "زبان یک ماهیچه است؟" val 6 answer true end
+        single_choice Anatomy_q13 text "مفصل زانو از چه نوعی است؟" val 6 options Anatomy_q13_o1 -> "لولایی" Anatomy_q13_o2 -> "گوی و کاسه" correct Anatomy_q13_o1 end
+        descriptive Anatomy_q14 text "فرآیند تنفس را شرح دهید." val 10 end
+        single_choice Anatomy_q15 text "تعداد دنده‌ها؟" val 4 options Anatomy_q15_o1 -> "۱۲ جفت" Anatomy_q15_o2 -> "۱۰ جفت" correct Anatomy_q15_o1 end
+    end
+
+    # --- QUIZ 2: FirstAid ---
+    quiz FirstAid label "فوریت‌های پزشکی" desc "کمک‌های اولیه" icon "aid.png" public time 20 min shuffle
+        single_choice FirstAid_q1 text "اولین اقدام در سوختگی؟" val 6 options FirstAid_q1_o1 -> "آب سرد" FirstAid_q1_o2 -> "روغن" correct FirstAid_q1_o1 end
+        true_false FirstAid_q2 text "در خونریزی بینی سر را به عقب بگیرید؟" val 6 answer false end
+        single_choice FirstAid_q3 text "تعداد ماساژ قلبی در دقیقه؟" val 6 options FirstAid_q3_o1 -> "۱۰۰-۱۲۰" FirstAid_q3_o2 -> "۶۰-۸۰" correct FirstAid_q3_o1 end
+        multi_choice FirstAid_q4 text "علائم گرمازدگی؟" val 6 options FirstAid_q4_o1 -> "سرگیجه" FirstAid_q4_o2 -> "تشنگی" FirstAid_q4_o3 -> "لرز" end
+        descriptive FirstAid_q5 text "مانور هیملیخ چیست؟" val 10 end
+        true_false FirstAid_q6 text "آتل برای ثابت‌سازی شکستگی است؟" val 6 answer true end
+        single_choice FirstAid_q7 text "در غرق‌شدگی اولین اقدام چیست؟" val 6 options FirstAid_q7_o1 -> "خارج کردن از آب" FirstAid_q7_o2 -> "تنفس مصنوعی" correct FirstAid_q7_o1 end
+        single_choice FirstAid_q8 text "محل فشار در CPR؟" val 6 options FirstAid_q8_o1 -> "مرکز قفسه سینه" FirstAid_q8_o2 -> "سمت چپ" correct FirstAid_q8_o1 end
+        true_false FirstAid_q9 text "شوک الکتریکی همیشه لازم است؟" val 6 answer false end
+        multi_choice FirstAid_q10 text "اقلام جعبه کمک‌های اولیه؟" val 6 options FirstAid_q10_o1 -> "باند" FirstAid_q10_o2 -> "الکل" FirstAid_q10_o3 -> "آسپیرین" end
+        single_choice FirstAid_q11 text "در نیش زنبور چه کنیم؟" val 6 options FirstAid_q11_o1 -> "خارج کردن نیش" FirstAid_q11_o2 -> "فشار دادن محل" correct FirstAid_q11_o1 end
+        true_false FirstAid_q12 text "نبض مچ دست رادیال نام دارد؟" val 6 answer true end
+        single_choice FirstAid_q13 text "در تشنج چه باید کرد؟" val 6 options FirstAid_q13_o1 -> "محافظت از سر" FirstAid_q13_o2 -> "گرفتن دست و پا" correct FirstAid_q13_o1 end
+        descriptive FirstAid_q14 text "علائم سکته قلبی را بنویسید." val 10 end
+        single_choice FirstAid_q15 text "دمای طبیعی بدن؟" val 4 options FirstAid_q15_o1 -> "۳۷" FirstAid_q15_o2 -> "۴۰" correct FirstAid_q15_o1 end
+    end
+
+    # --- QUIZ 3: Nutrition ---
+    quiz Nutrition label "تغذیه" desc "رژیم و سلامت" icon "food.png" public score 100
+        single_choice Nutrition_q1 text "کدام ویتامین در نارنجی‌هاست؟" val 6 options Nutrition_q1_o1 -> "ویتامین C" Nutrition_q1_o2 -> "ویتامین B" correct Nutrition_q1_o1 end
+        true_false Nutrition_q2 text "قند میوه فروکتوز است؟" val 6 answer true end
+        single_choice Nutrition_q3 text "منبع اصلی پروتئین گیاهی؟" val 6 options Nutrition_q3_o1 -> "حبوبات" Nutrition_q3_o2 -> "برنج" correct Nutrition_q3_o1 end
+        multi_choice Nutrition_q4 text "مواد معدنی ضروری؟" val 6 options Nutrition_q4_o1 -> "آهن" Nutrition_q4_o2 -> "کلسیم" Nutrition_q4_o3 -> "پلاستیک" end
+        descriptive Nutrition_q5 text "هرم غذایی را توضیح دهید." val 10 end
+        true_false Nutrition_q6 text "چربی‌های اشباع مفیدترند؟" val 6 answer false end
+        single_choice Nutrition_q7 text "کدام ویتامین برای بینایی است؟" val 6 options Nutrition_q7_o1 -> "A" Nutrition_q7_o2 -> "D" correct Nutrition_q7_o1 end
+        single_choice Nutrition_q8 text "کمبود آهن باعث چه می‌شود؟" val 6 options Nutrition_q8_o1 -> "کم‌خونی" Nutrition_q8_o2 -> "دیابت" correct Nutrition_q8_o1 end
+        true_false Nutrition_q9 text "آب ۸۰ درصد وزن بدن است؟" val 6 answer false end
+        multi_choice Nutrition_q10 text "منابع کلسیم؟" val 6 options Nutrition_q10_o1 -> "شیر" Nutrition_q10_o2 -> "کلم" Nutrition_q10_o3 -> "گوشت قرمز" end
+        single_choice Nutrition_q11 text "قند اصلی خون؟" val 6 options Nutrition_q11_o1 -> "گلوکز" Nutrition_q11_o2 -> "ساکارز" correct Nutrition_q11_o1 end
+        true_false Nutrition_q12 text "صبحانه مهم‌ترین وعده است؟" val 6 answer true end
+        single_choice Nutrition_q13 text "فیبر در کدام است؟" val 6 options Nutrition_q13_o1 -> "سبزیجات" Nutrition_q13_o2 -> "روغن" correct Nutrition_q13_o1 end
+        descriptive Nutrition_q14 text "نقش آنتی‌اکسیدان‌ها چیست؟" val 10 end
+        single_choice Nutrition_q15 text "ویتامین خورشید؟" val 4 options Nutrition_q15_o1 -> "D" Nutrition_q15_o2 -> "K" correct Nutrition_q15_o1 end
+    end
+end"""
+
+MESSAGE user "یک پلتفرم نظرسنجی عمومی بساز. تم بنفش. ادمین 'رضا'. شامل ۲ نظرسنجی: 'رضایت مشتری' و 'فرهنگ سازمانی'. هر کدام ۱۰ سوال داشته باشند. چون نظرسنجی هستند نمره و جواب صحیح ندارند (فقط فیلدهای اجباری گرامر را با مقادیر پیش‌فرض پر کن)."
+
+MESSAGE assistant """theme SurveyTheme
+    primary "#8B5CF6"
+    secondary "#A78BFA"
+    bg "#F3F4F6"
+    text "#111827"
+    font "Vazirmatn"
+end
+
+user SurveyAdmin
+    uid "admin_survey"
+    pwd "survey2026"
+    name "رضا حسینی"
+    admin
+end
+
+platform FeedbackHub
+    title "سامانه نظرسنجی هوشمند"
+    subtitle "صدای شما، راه پیشرفت ما"
+    logo "survey_logo.png"
+    use_theme SurveyTheme
+
+    # --- QUIZ 1: CustomerSat ---
+    quiz CustomerSat
+        label "رضایت مشتریان"
+        desc "سنجش کیفیت خدمات و محصولات"
+        icon "satisfaction.png"
+        public
+        show_result
+
+        multi_choice CustomerSat_q1
+            text "از کدام خدمات ما استفاده می‌کنید؟"
+            options
+                CustomerSat_q1_o1 -> "پشتیبانی فنی"
+                CustomerSat_q1_o2 -> "فروش آنلاین"
+                CustomerSat_q1_o3 -> "مشاوره حضوری"
+            end
+
+        single_choice CustomerSat_q2
+            text "نحوه آشنایی شما با ما چگونه بوده است؟"
+            options
+                CustomerSat_q2_o1 -> "اینستاگرام"
+                CustomerSat_q2_o2 -> "تبلیغات محیطی"
+                CustomerSat_q2_o3 -> "معرفی دوستان"
+            correct CustomerSat_q2_o1
+        end
+
+        true_false CustomerSat_q3
+            text "آیا وب‌سایت ما را به دیگران پیشنهاد می‌دهید؟"
+            answer true
+        end
+
+        descriptive CustomerSat_q4
+            text "بزرگترین نقطه قوت ما از نظر شما چیست؟"
+        end
+
+        multi_choice CustomerSat_q5
+            text "کدام دسته‌بندی محصولات برای شما جذاب‌تر است؟"
+            options
+                CustomerSat_q5_o1 -> "دیجیتال"
+                CustomerSat_q5_o2 -> "لوازم خانگی"
+                CustomerSat_q5_o3 -> "پوشاک"
+            end
+
+        single_choice CustomerSat_q6
+            text "سرعت پاسخگویی پشتیبانی را چگونه ارزیابی می‌کنید؟"
+            options
+                CustomerSat_q6_o1 -> "عالی"
+                CustomerSat_q6_o2 -> "متوسط"
+                CustomerSat_q6_o3 -> "ضعیف"
+            correct CustomerSat_q6_o1
+        end
+
+        true_false CustomerSat_q7
+            text "آیا فرآیند خرید آنلاین آسان بود؟"
+            answer true
+        end
+
+        descriptive CustomerSat_q8
+            text "چه پیشنهادی برای بهبود بسته‌بندی محصولات دارید؟"
+        end
+
+        single_choice CustomerSat_q9
+            text "دوره زمانی خرید شما چگونه است؟"
+            options
+                CustomerSat_q9_o1 -> "هفتگی"
+                CustomerSat_q9_o2 -> "ماهانه"
+                CustomerSat_q9_o3 -> "فصلی"
+            correct CustomerSat_q9_o2
+        end
+
+        descriptive CustomerSat_q10
+            text "توضیحات تکمیلی خود را بنویسید."
+        end
+    end
+
+    # --- QUIZ 2: OrgCulture ---
+    quiz OrgCulture
+        label "فرهنگ سازمانی"
+        desc "نظرسنجی داخلی ویژه کارکنان"
+        icon "office.png"
+        public
+        shuffle
+
+        true_false OrgCulture_q1
+            text "آیا از محیط کاری خود رضایت دارید؟"
+            answer true
+        end
+
+        multi_choice OrgCulture_q2
+            text "کدام مزایای رفاهی برای شما اولویت دارد؟"
+            options
+                OrgCulture_q2_o1 -> "بیمه تکمیلی"
+                OrgCulture_q2_o2 -> "ساعت کاری شناور"
+                OrgCulture_q2_o3 -> "پاداش عملکرد"
+            end
+
+        single_choice OrgCulture_q3
+            text "تعادل بین کار و زندگی شخصی خود را چگونه می‌بینید؟"
+            options
+                OrgCulture_q3_o1 -> "بسیار خوب"
+                OrgCulture_q3_o2 -> "قابل قبول"
+                OrgCulture_q3_o3 -> "نیاز به بهبود"
+            correct OrgCulture_q3_o1
+        end
+
+        descriptive OrgCulture_q4
+            text "مهم‌ترین مانع در پیشرفت کاری شما چیست؟"
+        end
+
+        true_false OrgCulture_q5
+            text "آیا اهداف سازمان برای شما شفاف است؟"
+            answer true
+        end
+
+        multi_choice OrgCulture_q6
+            text "در کدام حوزه‌ها نیاز به آموزش بیشتری دارید؟"
+            options
+                OrgCulture_q6_o1 -> "مهارت‌های نرم"
+                OrgCulture_q6_o2 -> "تخصص فنی"
+                OrgCulture_q6_o3 -> "مدیریت زمان"
+            end
+
+        single_choice OrgCulture_q7
+            text "ارتباط با مدیران مستقیم خود را چگونه ارزیابی می‌کنید؟"
+            options
+                OrgCulture_q7_o1 -> "صمیمانه"
+                OrgCulture_q7_o2 -> "رسمی و اداری"
+                OrgCulture_q7_o3 -> "دشوار"
+            correct OrgCulture_q7_o1
+        end
+
+        descriptive OrgCulture_q8
+            text "یک ایده برای شاداب‌تر شدن محیط کار پیشنهاد دهید."
+        end
+
+        true_false OrgCulture_q9
+            text "آیا ابزار لازم برای انجام وظایف در اختیار دارید؟"
+            answer true
+        end
+
+        descriptive OrgCulture_q10
+            text "نظر نهایی خود را در مورد فرهنگ سازمانی بنویسید."
+        end
+    end
+end"""
+
+
+MESSAGE user """یک پلتفرم برای 'کد آکادمی' بساز. 
+تم: اصلی #FF5733، ثانویه #C70039، پس‌زمینه #1A1A1B، متن #FFFFFF، فونت 'JetBrains Mono'.
+پلتفرم: 'CodeMaster'، زیرعنوان 'مرکز آموزش سی'، لوگو 'c_logo.svg'.
+آزمون ۱: 'مبانی C' (۵ سوال):
+۱. تک‌انتخابی: سایز int در سیستم ۶۴ بیتی؟ (گزینه‌ها: ۲، ۴، ۸ بایت. جواب: ۴. نمره ۱۰)
+۲. صحیح‌غلط: آیا C به حروف کوچک و بزرگ حساس است؟ (جواب: صحیح. نمره ۵)
+۳. چندانتخابی: عملگرهای منطقی کدامند؟ (گزینه‌ها: &&، ||، !، ++. نمره ۱۰)
+۴. تشریحی: توضیح #include (نمره ۱۵)
+۵. تک‌انتخابی: فرمت خروجی اعشاری؟ (گزینه‌ها: %d، %f، %c. جواب: %f. نمره ۱۰)
+
+آزمون ۲: 'پیشرفته C' (۱۰ سوال):
+۱. تک‌انتخابی: تعریف اشاره‌گر به اشاره‌گر؟ (گزینه‌ها: *p، **p. جواب: **p. نمره ۵)
+۲. صحیح‌غلط: malloc خروجی void* دارد؟ (جواب: صحیح. نمره ۵)
+۳. تشریحی: بازگشتی (Recursion) چیست؟ (نمره ۱۰)
+۴. چندانتخابی: کلاس‌های حافظه؟ (گزینه‌ها: auto، static، register، global. نمره ۱۰)
+۵. تک‌انتخابی: خروجی sizeof؟ (گزینه‌ها: int، size_t. جواب: size_t. نمره ۵)
+۶. صحیح‌غلط: سایز struct و union یکی است؟ (جواب: غلط. نمره ۵)
+۷. تک‌انتخابی: پیش‌پردازنده ماکرو؟ (گزینه‌ها: #define، #macro. جواب: #define. نمره ۵)
+۸. تشریحی: Dangling Pointer چیست؟ (نمره ۱۰)
+۹. تک‌انتخابی: خروج از حلقه؟ (گزینه‌ها: exit، break. جواب: break. نمره ۵)
+۱۰. صحیح‌غلط: ثابت‌ها (const) قابل تغییرند؟ (جواب: غلط. نمره ۵)"""
+
+MESSAGE assistant """theme CodeMasterTheme
+    primary "#FF5733"
+    secondary "#C70039"
+    bg "#1A1A1B"
+    text "#FFFFFF"
+    font "JetBrains Mono"
+end
+
+user AdminC uid "c_admin" pwd "root123" name "مدیر فنی" admin end
+
+platform CodeMaster
+    title "کد آکادمی"
+    subtitle "مرکز آموزش سی"
+    logo "c_logo.svg"
+    use_theme CodeMasterTheme
+
+    # --- QUIZ 1: BasicC ---
+    quiz BasicC label "مبانی C" desc "آشنایی با سینتکس و مفاهیم پایه" icon "basic.png" public time 20 min score 50
+        single_choice BasicC_q1 text "سایز int در سیستم ۶۴ بیتی چند بایت است؟" val 10
+            options
+                BasicC_q1_o1 -> "۲ بایت"
+                BasicC_q1_o2 -> "۴ بایت"
+                BasicC_q1_o3 -> "۸ بایت"
+            correct BasicC_q1_o2
+        end
+
+        true_false BasicC_q2 text "آیا C به حروف کوچک و بزرگ حساس است؟" val 5 answer true end
+
+        multi_choice BasicC_q3 text "کدام موارد از عملگرهای منطقی در C هستند؟" val 10
+            options
+                BasicC_q3_o1 -> "&&"
+                BasicC_q3_o2 -> "||"
+                BasicC_q3_o3 -> "!"
+                BasicC_q3_o4 -> "++"
+            end
+
+        descriptive BasicC_q4 text "وظیفه دستور #include در ابتدای برنامه چیست؟" val 15 end
+
+        single_choice BasicC_q5 text "فرمت مشخصه برای چاپ اعداد اعشاری (float) چیست؟" val 10
+            options
+                BasicC_q1_o1 -> "%d" # اصلاح شماره سوال در ID گزینه
+                BasicC_q5_o2 -> "%f"
+                BasicC_q5_o3 -> "%c"
+            correct BasicC_q5_o2
+        end
+    end
+
+    # --- QUIZ 2: AdvancedC ---
+    quiz AdvancedC label "پیشرفته C" desc "مدیریت حافظه و اشاره‌گرها" icon "adv.png" private time 40 min score 65
+        single_choice AdvancedC_q1 text "کدام گزینه یک اشاره‌گر به اشاره‌گر را تعریف می‌کند؟" val 5
+            options
+                AdvancedC_q1_o1 -> "*p"
+                AdvancedC_q1_o2 -> "**p"
+            correct AdvancedC_q1_o2
+        end
+
+        true_false AdvancedC_q2 text "آیا تابع malloc خروجی از نوع void* برمی‌گرداند؟" val 5 answer true end
+
+        descriptive AdvancedC_q3 text "مفهوم تابع بازگشتی (Recursion) را در برنامه‌نویسی شرح دهید." val 10 end
+
+        multi_choice AdvancedC_q4 text "کدام موارد از کلاس‌های حافظه (Storage Classes) در C هستند؟" val 10
+            options
+                AdvancedC_q4_o1 -> "auto"
+                AdvancedC_q4_o2 -> "static"
+                AdvancedC_q4_o3 -> "register"
+                AdvancedC_q4_o4 -> "global"
+            end
+
+        single_choice AdvancedC_q5 text "نوع داده خروجی عملگر sizeof چیست؟" val 5
+            options
+                AdvancedC_q5_o1 -> "int"
+                AdvancedC_q5_o2 -> "size_t"
+            correct AdvancedC_q5_o2
+        end
+
+        true_false AdvancedC_q6 text "آیا سایز یک struct و یک union با اعضای مشابه، همیشه برابر است؟" val 5 answer false end
+
+        single_choice AdvancedC_q7 text "کدام دستور پیش‌پردازنده برای تعریف ماکرو به کار می‌رود؟" val 5
+            options
+                AdvancedC_q7_o1 -> "#define"
+                AdvancedC_q7_o2 -> "#macro"
+            correct AdvancedC_q7_o1
+        end
+
+        descriptive AdvancedC_q8 text "مفهوم Dangling Pointer (اشاره‌گر معلق) را توضیح دهید." val 10 end
+
+        single_choice AdvancedC_q9 text "کدام کلمه کلیدی برای خروج فوری از حلقه استفاده می‌شود؟" val 5
+            options
+                AdvancedC_q9_o1 -> "exit"
+                AdvancedC_q9_o2 -> "break"
+            correct AdvancedC_q9_o2
+        end
+
+        true_false AdvancedC_q10 text "آیا متغیرهایی که با const تعریف شده‌اند، در طول برنامه قابل مقداردهی مجدد هستند؟" val 5 answer false end
+    end
+end"""
+
+
+MESSAGE user "یک پلتفرم با نام 'علی هاب' برای ۳ آزمون دات‌نت (مقدماتی، متوسط، پیشرفته) بساز. هر آزمون ۳ سوال داشته باشد (برای اختصار در این مثال، اما در خروجی واقعی کامل بنویس). نمره هر آزمون ۳ باشد. IDها کاملاً یونیک باشند."
+
+MESSAGE assistant """theme AliHubTheme primary "#0078D4" secondary "#512BD4" bg "#F3F2F1" text "#201F1E" font "Segoe UI" end
+
+user AdminAli uid "ali_admin" pwd "dotnet2024" name "علی" admin end
+
+platform AliHub
+    title "علی هاب"
+    subtitle "سنجش تخصصی .NET"
+    logo "dotnet.png"
+    use_theme AliHubTheme
+
+    quiz JuniorDotNet label "مقدماتی" desc "سطح جونیور" icon "jr.png" public time 10 min shuffle show_result score 3
+        single_choice JuniorDotNet_q1 text "CLR چیست؟" val 1
+            options
+                JuniorDotNet_q1_o1 -> "Runtime"
+                JuniorDotNet_q1_o2 -> "Compiler"
+            correct JuniorDotNet_q1_o1
+        end
+        single_choice JuniorDotNet_q2 text "سایز int؟" val 1
+            options
+                JuniorDotNet_q2_o1 -> "4 Byte"
+                JuniorDotNet_q2_o2 -> "2 Byte"
+            correct JuniorDotNet_q2_o1
+        end
+        single_choice JuniorDotNet_q3 text "تفاوت Struct و Class؟" val 1
+            options
+                JuniorDotNet_q3_o1 -> "Value vs Ref"
+                JuniorDotNet_q3_o2 -> "یکسان هستند"
+            correct JuniorDotNet_q3_o1
+        end
+    end
+
+    quiz MidDotNet label "متوسط" desc "سطح مید-لول" icon "mid.png" public time 15 min shuffle show_result score 3
+        single_choice MidDotNet_q1 text "DI چیست؟" val 1
+            options
+                MidDotNet_q1_o1 -> "Dependency Injection"
+                MidDotNet_q1_o2 -> "Data Input"
+            correct MidDotNet_q1_o1
+        end
+        single_choice MidDotNet_q2 text "کدام کلمه کلیدی برای ارث‌بری است؟" val 1
+            options
+                MidDotNet_q2_o1 -> ":"
+                MidDotNet_q2_o2 -> "extends"
+            correct MidDotNet_q2_o1
+        end
+        single_choice MidDotNet_q3 text "Async/Await برای چیست؟" val 1
+            options
+                MidDotNet_q3_o1 -> "Task-based Programming"
+                MidDotNet_q3_o2 -> "UI Design"
+            correct MidDotNet_q3_o1
+        end
+    end
+
+    quiz SeniorDotNet label "پیشرفته" desc "سطح سینیور" icon "sr.png" public time 20 min shuffle show_result score 3
+        single_choice SeniorDotNet_q1 text "Span<T> کجا ذخیره می‌شود؟" val 1
+            options
+                SeniorDotNet_q1_o1 -> "Stack"
+                SeniorDotNet_q1_o2 -> "Heap"
+            correct SeniorDotNet_q1_o1
+        end
+        single_choice SeniorDotNet_q2 text "کاربرد IAsyncEnumerable؟" val 1
+            options
+                SeniorDotNet_q2_o1 -> "Streaming Data"
+                SeniorDotNet_q2_o2 -> "Blocking Calls"
+            correct SeniorDotNet_q2_o1
+        end
+        single_choice SeniorDotNet_q3 text "JIT مخفف چیست؟" val 1
+            options
+                SeniorDotNet_q3_o1 -> "Just-In-Time"
+                SeniorDotNet_q3_o2 -> "Just-In-Table"
+            correct SeniorDotNet_q3_o1
+        end
+    end
+end"""
