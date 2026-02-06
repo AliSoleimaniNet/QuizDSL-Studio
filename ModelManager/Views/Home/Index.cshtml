@@ -1,0 +1,378 @@
+﻿@{
+    ViewData["Title"] = "Quiz Management";
+}
+
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4 p-3 bg-dark rounded shadow">
+        <h2 class="text-white m-0">🛠️ QuizDSL Studio</h2>
+        <div>
+            <a href="/hangfire" target="_blank" class="btn btn-outline-warning me-2">📋 Jobs Queue</a>
+            <button class="btn btn-primary" onclick="openNewModelModal()">+ New Model</button>
+        </div>
+    </div>
+
+    <div class="row row-cols-1 row-cols-md-3 g-4" id="modelsGrid">
+        @foreach (var m in Model)
+        {
+            <div class="col" id="card-@m.Name">
+                <div class="card h-100 shadow-sm border-0 bg-dark text-white">
+                    <div class="position-relative">
+                        <img src="@(string.IsNullOrEmpty(m.ImagePath) ? "https://via.placeholder.com/300x150?text=No+Preview" : m.ImagePath + "?t=" + DateTime.Now.Ticks)" 
+                             class="card-img-top" style="height: 180px; object-fit: cover;">
+                        <span class="badge position-absolute top-0 end-0 m-2 @(m.Status == "Success" ? "bg-success" : (m.Status == "Failed" ? "bg-danger" : "bg-secondary"))">
+                            @m.Status
+                        </span>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title">@m.Name</h5>
+                        <div class="d-flex justify-content-between mt-3">
+                            <button class="btn btn-sm btn-info w-75 me-1" onclick="loadDetails('@m.Name')">View & Edit</button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteModel('@m.Name')">🗑️</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+<div class="container mt-4 mb-5" dir="rtl"> <div class="card bg-dark border-secondary shadow-lg">
+        <div class="card-header bg-dark d-flex justify-content-between align-items-center border-secondary">
+            <h6 class="mb-0 text-info fw-bold">🖥️ مرکز کنترل و مانیتورینگ سیستم</h6>
+            <div class="btn-group" dir="rtl">
+                <button onclick="stopJob('All')" class="btn btn-sm btn-danger">STOP ALL</button>
+                <button onclick="stopJob('Run')" class="btn btn-sm btn-outline-success">Kill Python</button>
+                <button onclick="stopJob('Build')" class="btn btn-sm btn-outline-warning">Kill Build</button>
+                <button onclick="stopJob('AI')" class="btn btn-sm btn-outline-info">Kill AI</button>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <ul class="nav nav-tabs border-0 bg-dark" id="logTabs" role="tablist">
+                <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#ai-log">Ollama AI</button></li>
+                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#build-log">Java Compiler</button></li>
+                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#run-log">Python Runtime</button></li>
+            </ul>
+            <div class="tab-content">
+                <div class="tab-pane fade show active terminal-window text-info ltr" id="ai-log"></div>
+                <div class="tab-pane fade terminal-window text-warning ltr" id="build-log"></div>
+                <div class="tab-pane fade terminal-window text-success ltr" id="run-log"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modelModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content bg-dark text-white border-secondary">
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title" id="modalTitle">Model Details</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-7">
+                        <div class="mb-3">
+                            <label class="form-label text-info">Model Name</label>
+                            <input type="text" id="m_name" class="form-control bg-secondary text-white border-0">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-info">User Prompt (AI Instructions)</label>
+                            <textarea id="m_prompt" class="form-control bg-secondary text-white border-0" rows="3"></textarea>
+                        </div>
+                        <div class="mb-3">
+    <div class="d-flex justify-content-between mb-1">
+        <div>
+            <label class="form-label text-info fw-bold">Quiz DSL Code Editor</label>
+            <button id="manageImagesBtn" class="btn btn-sm btn-outline-info ms-2" style="display:none;" onclick="openImageManager()">🖼️ Manage Images</button>
+        </div>
+        <button class="btn btn-sm btn-warning" onclick="generateAI()">✨ Generate by AI</button>
+    </div>
+    <textarea id="m_quiz" class="form-control"></textarea>
+</div>
+
+<div class="modal fade" id="imageModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content bg-dark text-white border-info shadow-lg">
+            <div class="modal-header border-info">
+                <h5 class="modal-title">📦 Resource Manager (PNG/JPG)</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="imageList" class="row g-3">
+                    </div>
+            </div>
+        </div>
+    </div>
+</div>
+                    </div>
+                    <div class="col-md-5">
+                        <label class="form-label text-info">Current Status</label>
+                        <div id="m_status_badge" class="alert py-1 mb-3">Unknown</div>
+                        
+                        <label class="form-label text-info">Compiler Output</label>
+                        <div id="m_output" class="bg-black p-2 rounded mb-3 text-secondary font-monospace" style="height: 150px; overflow-y: auto; font-size: 0.8rem;"></div>
+
+                        <div class="d-grid gap-2">
+                            <button id="saveBtn" class="btn btn-primary" onclick="saveData()">💾 Save All Changes</button>
+                            <button class="btn btn-outline-info" onclick="buildModel()">🛠️ Build Model (Java)</button>
+                            <form id="runForm" action="/Home/Run" method="POST" target="_blank">
+                                <input type="hidden" name="modelName" id="run_modelName">
+                                <button type="submit" id="runBtn" class="btn btn-success w-100" style="display:none;">🚀 Run & Open App</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/theme/dracula.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/clike/clike.min.js"></script>
+
+    <script>
+        const modal = new bootstrap.Modal(document.getElementById('modelModal'));
+        const imageModal = new bootstrap.Modal(document.getElementById('imageModal'));
+        let quizEditor;
+        let isEditMode = false;
+        let refreshInterval = null;
+
+        // ۱. مقداردهی اولیه ادیتور
+        document.addEventListener('DOMContentLoaded', () => {
+            quizEditor = CodeMirror.fromTextArea(document.getElementById('m_quiz'), {
+                mode: 'text/x-java',
+                theme: 'dracula',
+                lineNumbers: true,
+                tabSize: 4,
+                lineWrapping: true
+            });
+
+            quizEditor.on("change", () => {
+                const saveBtn = document.getElementById('saveBtn');
+                saveBtn.classList.remove('btn-primary');
+                saveBtn.classList.add('btn-warning');
+                checkImageButton(); // بررسی لحظه‌ای برای دکمه عکس
+            });
+        });
+         function openNewModelModal() {
+            stopAutoRefresh();
+            isEditMode = false;
+            document.getElementById('m_name').disabled = false;
+            document.getElementById('m_name').value = "";
+            document.getElementById('m_prompt').value = "";
+            document.getElementById('m_quiz').value = "";
+            document.getElementById('m_output').innerText = "";
+            document.getElementById('m_status_badge').innerText = "New";
+            document.getElementById('m_status_badge').className = "alert py-1 mb-3 alert-secondary";
+            document.getElementById('runBtn').style.display = "none";
+            const saveBtn = document.getElementById('saveBtn');
+            saveBtn.classList.add('btn-primary');
+            saveBtn.classList.remove('btn-warning');
+            modal.show();
+        }
+        // ۲. منطق دکمه مدیریت تصاویر
+        function checkImageButton() {
+            const content = quizEditor.getValue();
+            const saveBtn = document.getElementById('saveBtn');
+            const hasImg = /\"[^\"]+\.(png|jpg|jpeg|gif)\"/.test(content);
+            
+            const isSaved = saveBtn.classList.contains('btn-primary');
+            document.getElementById('manageImagesBtn').style.display = (hasImg && isSaved) ? 'inline-block' : 'none';
+        }
+
+        async function openImageManager() {
+            const name = document.getElementById('m_name').value;
+            try {
+                const res = await axios.get(`/Home/GetModelImages/${name}`);
+                const listDiv = document.getElementById('imageList');
+                listDiv.innerHTML = '';
+
+                if (res.data.length === 0) {
+                    listDiv.innerHTML = '<div class="col-12 text-center text-muted">No image references found in DSL.</div>';
+                }
+
+                res.data.forEach(img => {
+                    const card = `
+                        <div class="col-md-6">
+                            <div class="card bg-secondary text-white p-2 border-0 shadow-sm">
+                                <div class="d-flex align-items-center">
+                                    <img src="${img.exists ? img.path + '?t=' + Date.now() : 'https://via.placeholder.com/60?text=Missing'}" 
+                                         style="width:60px; height:60px; object-fit:cover;" class="rounded shadow-sm me-2">
+                                    <div class="flex-grow-1 overflow-hidden">
+                                        <div class="text-truncate small fw-bold">${img.name}</div>
+                                        <input type="file" id="file-${img.name.replace(/\W/g, '_')}" 
+                                               onchange="uploadImage('${img.name}')" hidden accept="image/*">
+                                        <button class="btn btn-sm ${img.exists ? 'btn-light' : 'btn-info'} py-0 px-2 mt-1" 
+                                                onclick="document.getElementById('file-${img.name.replace(/\W/g, '_')}').click()">
+                                            ${img.exists ? 'Replace' : 'Upload'}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>`;
+                    listDiv.insertAdjacentHTML('beforeend', card);
+                });
+                imageModal.show();
+            } catch (err) { alert("Error loading images."); }
+        }
+
+        async function uploadImage(fileName) {
+            const modelName = document.getElementById('m_name').value;
+            const inputId = `file-${fileName.replace(/\W/g, '_')}`;
+            const fileInput = document.getElementById(inputId);
+            
+            if (!fileInput.files[0]) return;
+
+            const formData = new FormData();
+            formData.append("file", fileInput.files[0]);
+            formData.append("modelName", modelName);
+            formData.append("fileName", fileName);
+
+            try {
+                await axios.post('/Home/UploadModelImage', formData);
+                openImageManager(); // رفرش لیست تصاویر بعد از آپلود
+            } catch (err) { alert("Upload failed."); }
+        }
+
+        // ۳. توابع اصلی مدل
+        async function loadDetails(name) {
+            isEditMode = true;
+            const res = await axios.get(`/${name}`);
+            const data = res.data;
+
+            document.getElementById('m_name').value = data.name;
+            document.getElementById('m_name').disabled = true;
+            document.getElementById('m_prompt').value = data.userPrompt;
+            
+            quizEditor.setValue(data.quizContent || "");
+            
+            // بازنشانی وضعیت دکمه ذخیره
+            const saveBtn = document.getElementById('saveBtn');
+            saveBtn.classList.add('btn-primary');
+            saveBtn.classList.remove('btn-warning');
+
+            modal.show();
+            setTimeout(() => { 
+                quizEditor.refresh(); 
+                checkImageButton(); 
+            }, 200);
+            
+            startAutoRefresh(name);
+        }
+
+        async function saveData() {
+            const payload = {
+                info: {
+                    name: document.getElementById('m_name').value,
+                    userPrompt: document.getElementById('m_prompt').value
+                },
+                quizContent: quizEditor.getValue()
+            };
+            try {
+                await axios.post('/Home/Save', payload);
+                const saveBtn = document.getElementById('saveBtn');
+                saveBtn.classList.replace('btn-warning', 'btn-primary');
+                checkImageButton(); 
+                alert("Saved!");
+            } catch (e) { alert("Save error."); }
+        }
+
+        function stopAutoRefresh() { if (refreshInterval) clearInterval(refreshInterval); }
+        function startAutoRefresh(name) {
+            stopAutoRefresh();
+            refreshInterval = setInterval(() => updateStatusOnly(name), 1000);
+        }
+
+         async function updateStatusOnly(name) {
+    try {
+        const res = await axios.get(`/${name}`);
+        const data = res.data;
+        const outputDiv = document.getElementById('m_output');
+        if (outputDiv && outputDiv.getAttribute('data-last-content') !== data.lastCompilerOutput) {
+            let content = data.lastCompilerOutput || "No logs available.";
+            if (content.includes("SUCCESS: Generation completed.")) {
+                content = content.replace("SUCCESS: Generation completed.", '<span class="log-success">SUCCESS: Generation completed.</span>');
+            }
+            outputDiv.setAttribute('data-last-content', data.lastCompilerOutput);
+            outputDiv.innerHTML = content;
+            if (outputDiv.scrollHeight - outputDiv.clientHeight <= outputDiv.scrollTop + 60) {
+                outputDiv.scrollTop = outputDiv.scrollHeight;
+            }
+        }
+        const badge = document.getElementById('m_status_badge');
+        if (badge) {
+            badge.innerText = data.status;
+            badge.className = `alert py-1 mb-3 ${data.status === 'Success' ? 'alert-success' : (data.status === 'Failed' ? 'alert-danger' : 'alert-secondary')}`;
+        }
+        const runBtn = document.getElementById('runBtn');
+        if (runBtn) {
+            runBtn.style.display = data.status === "Success" ? "block" : "none";
+            document.getElementById('run_modelName').value = data.name;
+        }
+
+    } catch (error) {
+        console.error("Refresh error:", error);
+    }
+}
+        
+        async function deleteModel(name) {
+            if(confirm(`Delete ${name}?`)) {
+                await axios.delete(`/Home/Delete?name=${name}`);
+                location.reload();
+            }
+        }
+
+        async function buildModel() {
+            const name = document.getElementById('m_name').value;
+            await axios.post(`/Home/Build?modelName=${encodeURIComponent(name)}`);
+        }
+
+        async function generateAI() {
+            const name = document.getElementById('m_name').value;
+            const prompt = document.getElementById('m_prompt').value;
+            await axios.post(`/Home/GenerateByAi?modelName=${encodeURIComponent(name)}&prompt=${encodeURIComponent(prompt)}`);
+        }
+        
+        
+    setInterval(async () => {
+
+        try {
+
+            const res = await axios.get('/Home/GetLiveLogs');
+
+            updateTerminal('ai-log', res.data.ai);
+
+            updateTerminal('build-log', res.data.build);
+
+            updateTerminal('run-log', res.data.run);
+
+        } catch(e) {}
+
+    }, 1000);
+
+
+
+    function updateTerminal(id, content) {
+
+        const el = document.getElementById(id);
+
+        const isAtBottom = el.scrollHeight - el.clientHeight <= el.scrollTop + 1;
+
+        el.innerText = content || "> Waiting for process...";
+
+        if (isAtBottom) el.scrollTop = el.scrollHeight;
+
+    }
+
+        async function stopJob(type) {
+
+        if(confirm(`Stop ${type} process?`)) {
+
+            await axios.post(`/Home/StopJob?type=${type}`);
+
+        }
+
+    }
+    </script>
+}

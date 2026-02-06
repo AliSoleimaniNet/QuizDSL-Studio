@@ -1,0 +1,22 @@
+theme SimpleTheme primary "#28a745" secondary "#17a2b8" bg "#f8f9fa" text "#343a40" font "Vazirmatn" end
+
+user AliAdmin uid "ali_admin" pwd "admin123" name "علی" admin end
+
+platform TestPlatform
+    title "پلتفرم آزمون"
+    subtitle "آزمون ساده"
+    logo "test_logo.png"
+    use_theme SimpleTheme
+
+    quiz SingleQuestionTest label "آزمون تک سوال" desc "آزمون ساده با یک سوال" icon "question.png" public time 1 min score 20
+
+        single_choice SingleQuestionTest_q1 text "کدام یک از موارد زیر در مورد C# صحیح است؟" val 20
+            options
+                SingleQuestionTest_q1_o1 -> "یک زبان اسکریپتی است."
+                SingleQuestionTest_q1_o2 -> "یک زبان کامپایلری است."
+                SingleQuestionTest_q1_o3 -> "فقط برای توسعه وب استفاده می‌شود."
+                SingleQuestionTest_q1_o4 -> "یک زبان فقط برای بازی‌سازی است."
+            correct SingleQuestionTest_q1_o2
+        end
+    end
+end

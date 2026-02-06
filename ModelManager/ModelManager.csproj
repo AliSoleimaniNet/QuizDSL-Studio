@@ -1,0 +1,35 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="wwwroot\models\**" />
+    <Content Remove="wwwroot\models\**" />
+    <EmbeddedResource Remove="wwwroot\models\**" />
+    <None Remove="wwwroot\models\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="QuizCompiler.jar" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <PackageReference Include="Hangfire" Version="1.8.23" />
+    <PackageReference Include="Hangfire.MemoryStorage" Version="1.8.1.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="10.0.2" />
+    <PackageReference Include="PuppeteerSharp" Version="20.2.6" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <Resource Include="QuizCompiler.jar">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+  </ItemGroup>
+
+</Project>

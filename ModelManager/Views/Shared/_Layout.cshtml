@@ -1,0 +1,114 @@
+﻿<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - QuizDSL Studio</title>
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
+    
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono&family=Vazirmatn:wght@100;400;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+            background-color: #121212; 
+            color: #e0e0e0;
+        }
+
+        .font-monospace {
+            font-family: 'JetBrains Mono', monospace !important;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1e1e1e;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #444;
+        }
+    </style>
+
+    <style>
+    .terminal-window {
+        background-color: #050505;
+        border: 1px solid #333;
+        border-radius: 0 0 8px 8px;
+        font-family: 'JetBrains Mono', 'Consolas', monospace;
+        height: 300px;
+        overflow-y: auto;
+        padding: 15px;
+        font-size: 13px;
+        line-height: 1.5;
+        white-space: pre-wrap;
+        direction: ltr !important;
+        text-align: left !important;
+    }
+    .nav-tabs .nav-link {
+        color: #888;
+        border: 1px solid transparent;
+        font-family: 'Vazirmatn', sans-serif;
+    }
+    
+    .nav-tabs .nav-link.active {
+        background-color: #050505;
+        color: #fff !important;
+        border-color: #333 #333 transparent;
+    }
+</style>
+<style>
+    #m_output {
+    direction: ltr !important;
+    text-align: left !important;
+    white-space: pre-wrap; 
+    border: 1px solid #333;
+    line-height: 1.4;
+}
+
+.log-success {
+    color: #28a745 !important;
+    font-weight: bold;
+}
+</style>
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-dark bg-dark border-bottom border-secondary shadow-sm mb-3">
+            <div class="container">
+                <a class="navbar-brand text-info fw-bold" asp-area="" asp-controller="Home" asp-action="Index">🚀 QuizDSL Studio</a>
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <ul class="navbar-nav flex-grow-1">
+                        <li class="nav-item">
+                            <a class="nav-link text-light" asp-area="" asp-controller="Home" asp-action="Index">خانه</a>
+                        </li>
+                    </ul>
+                    <span class="navbar-text text-secondary small">
+                        Version 1.0.0 | 2026
+                    </span>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main role="main" class="pb-3">
+        @RenderBody()
+    </main>
+
+    <footer class="border-top border-secondary footer text-muted bg-dark pt-3 pb-3 mt-5">
+        <div class="container text-center">
+            &copy; 2026 - Quiz Management System - <span class="text-info">Powered by Ollama & .NET 10</span>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

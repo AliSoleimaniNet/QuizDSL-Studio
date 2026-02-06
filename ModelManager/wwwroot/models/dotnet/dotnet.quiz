@@ -1,0 +1,139 @@
+theme DotNetHubTheme primary "#28A745" secondary "#343A40" bg "#F8F9FA" text "#343A40" font "Vazirmatn" end
+
+user AdminDotNet uid "dotnet_admin" pwd "dotnet2024" name "مدیر دات نت" admin end
+
+platform DotNetHub
+    title "دات نت هاب"
+    subtitle "سنجش تخصصی توسعه‌دهندگان دات نت"
+    logo "dotnet_logo.png"
+    use_theme DotNetHubTheme
+
+    quiz JuniorDotNet label "مقدماتی" desc "سطح جونیور" icon "jr.png" public time 3 min shuffle show_result score 20
+        single_choice JuniorDotNet_q1 text "CLR چیست؟" val 4
+            options
+                JuniorDotNet_q1_o1 -> "Runtime Environment"
+                JuniorDotNet_q1_o2 -> "Compiler"
+                JuniorDotNet_q1_o3 -> "IDE"
+                JuniorDotNet_q1_o4 -> "Framework"
+            correct JuniorDotNet_q1_o1
+        end
+        single_choice JuniorDotNet_q2 text "سایز int؟" val 4
+            options
+                JuniorDotNet_q2_o1 -> "2 Byte"
+                JuniorDotNet_q2_o2 -> "4 Byte"
+                JuniorDotNet_q2_o3 -> "8 Byte"
+                JuniorDotNet_q2_o4 -> "1 Byte"
+            correct JuniorDotNet_q2_o2
+        end
+        single_choice JuniorDotNet_q3 text "تفاوت Struct و Class؟" val 4
+            options
+                JuniorDotNet_q3_o1 -> "Value vs Reference Type"
+                JuniorDotNet_q3_o2 -> "Struct is abstract"
+                JuniorDotNet_q3_o3 -> "Class is immutable"
+                JuniorDotNet_q3_o4 -> "They are identical"
+            correct JuniorDotNet_q3_o1
+        end
+        single_choice JuniorDotNet_q4 text "کدام یک از موارد زیر یک delegate است؟" val 4
+            options
+                JuniorDotNet_q4_o1 -> "Func<T, TResult>"
+                JuniorDotNet_q4_o2 -> "Class"
+                JuniorDotNet_q4_o3 -> "Struct"
+                JuniorDotNet_q4_o4 -> "Enum"
+            correct JuniorDotNet_q4_o1
+        end
+        single_choice JuniorDotNet_q5 text "کدام یک از موارد زیر برای مدیریت وابستگی‌ها استفاده می‌شود؟" val 4
+            options
+                JuniorDotNet_q5_o1 -> "Dependency Injection"
+                JuniorDotNet_q5_o2 -> "Garbage Collection"
+                JuniorDotNet_q5_o3 -> "JIT Compilation"
+                JuniorDotNet_q5_o4 -> "Reflection"
+            correct JuniorDotNet_q5_o1
+        end
+    end
+
+    quiz MidDotNet label "متوسطه" desc "سطح مید-لول" icon "mid.png" public time 4 min shuffle show_result score 20
+        single_choice MidDotNet_q1 text "LINQ مخفف چیست؟" val 4
+            options
+                MidDotNet_q1_o1 -> "Language Integrated Query"
+                MidDotNet_q1_o2 -> "Library Integrated Query"
+                MidDotNet_q1_o3 -> "Logical Integrated Query"
+                MidDotNet_q1_o4 -> "Linked Integrated Query"
+            correct MidDotNet_q1_o1
+        end
+        single_choice MidDotNet_q2 text "Async/Await برای چه منظوری استفاده می‌شود؟" val 4
+            options
+                MidDotNet_q2_o1 -> "Task-based asynchronous programming"
+                MidDotNet_q2_o2 -> "UI Design"
+                MidDotNet_q2_o3 -> "Database Connection"
+                MidDotNet_q2_o4 -> "File Management"
+            correct MidDotNet_q2_o1
+        end
+        single_choice MidDotNet_q3 text "تفاوت بین List و Array چیست؟" val 4
+            options
+                MidDotNet_q3_o1 -> "List is dynamic, Array is fixed size"
+                MidDotNet_q3_o2 -> "Array is dynamic, List is fixed size"
+                MidDotNet_q3_o3 -> "They are identical"
+                MidDotNet_q3_o4 -> "List is only for integers"
+            correct MidDotNet_q3_o1
+        end
+        single_choice MidDotNet_q4 text "کدام یک از موارد زیر یک Generic Interface است؟" val 4
+            options
+                MidDotNet_q4_o1 -> "IEnumerable<T>"
+                MidDotNet_q4_o2 -> "IComparable"
+                MidDotNet_q4_o3 -> "ICloneable"
+                MidDotNet_q4_o4 -> "IDisposable"
+            correct MidDotNet_q4_o1
+        end
+        single_choice MidDotNet_q5 text "هدف از استفاده از Attributeها چیست؟" val 4
+            options
+                MidDotNet_q5_o1 -> "Metadata"
+                MidDotNet_q5_o2 -> "Error Handling"
+                MidDotNet_q5_o3 -> "Performance Optimization"
+                MidDotNet_q5_o4 -> "Security"
+            correct MidDotNet_q5_o1
+        end
+    end
+
+    quiz SeniorDotNet label "پیشرفته" desc "سطح سینیور" icon "sr.png" public time 5 min shuffle show_result score 20
+        single_choice SeniorDotNet_q1 text "Span<T> چه مزایایی نسبت به Array دارد؟" val 4
+            options
+                SeniorDotNet_q1_o1 -> "Zero-copy memory access"
+                SeniorDotNet_q1_o2 -> "Automatic garbage collection"
+                SeniorDotNet_q1_o3 -> "Faster compilation"
+                SeniorDotNet_q1_o4 -> "Smaller memory footprint"
+            correct SeniorDotNet_q1_o1
+        end
+        single_choice SeniorDotNet_q2 text "IAsyncEnumerable<T> برای چه منظوری استفاده می‌شود؟" val 4
+            options
+                SeniorDotNet_q2_o1 -> "Streaming data asynchronously"
+                SeniorDotNet_q2_o2 -> "Blocking calls"
+                SeniorDotNet_q2_o3 -> "Parallel processing"
+                SeniorDotNet_q2_o4 -> "Data validation"
+            correct SeniorDotNet_q2_o1
+        end
+        single_choice SeniorDotNet_q3 text "JIT Compilation چیست؟" val 4
+            options
+                SeniorDotNet_q3_o1 -> "Just-In-Time Compilation"
+                SeniorDotNet_q3_o2 -> "Java Integrated Tool"
+                SeniorDotNet_q3_o3 -> "JavaScript Implementation Technique"
+                SeniorDotNet_q3_o4 -> "Joint Interface Technology"
+            correct SeniorDotNet_q3_o1
+        end
+        single_choice SeniorDotNet_q4 text "چه تفاوتی بین ValueTask و Task وجود دارد؟" val 4
+            options
+                SeniorDotNet_q4_o1 -> "ValueTask avoids heap allocation"
+                SeniorDotNet_q4_o2 -> "Task is always asynchronous"
+                SeniorDotNet_q4_o3 -> "ValueTask is synchronous"
+                SeniorDotNet_q4_o4 -> "They are identical"
+            correct SeniorDotNet_q4_o1
+        end
+        single_choice SeniorDotNet_q5 text "هدف از استفاده از Source Generators چیست؟" val 4
+            options
+                SeniorDotNet_q5_o1 -> "Compile-time code generation"
+                SeniorDotNet_q5_o2 -> "Runtime code optimization"
+                SeniorDotNet_q5_o3 -> "Debugging assistance"
+                SeniorDotNet_q5_o4 -> "Memory management"
+            correct SeniorDotNet_q5_o1
+        end
+    end
+end

@@ -5,7 +5,8 @@ bin/
 .gradle/
 .settings/
 .metadata/
-
+obj/
+.vs/
 
 target/
 pom.xml.tag
