@@ -1,0 +1,29 @@
+Manifest-Version: 1.0
+Automatic-Module-Name: org.example.quiz
+Bundle-ManifestVersion: 2
+Bundle-Name: org.example.quiz
+Bundle-Vendor: My Company
+Bundle-Version: 1.0.0.qualifier
+Bundle-SymbolicName: org.example.quiz; singleton:=true
+Bundle-ActivationPolicy: lazy
+Require-Bundle: org.eclipse.xtext,
+ org.eclipse.xtext.xbase,
+ org.eclipse.equinox.common;bundle-version="3.19.0",
+ org.eclipse.emf.ecore,
+ org.eclipse.xtext.xbase.lib;bundle-version="2.41.0",
+ org.eclipse.emf.common,
+ org.antlr.runtime;bundle-version="[3.2.0,3.2.1)",
+ org.eclipse.core.resources;bundle-version="3.23.100"
+Bundle-RequiredExecutionEnvironment: JavaSE-21
+Export-Package: org.example.quiz.parser.antlr.internal,
+ org.example.quiz.services,
+ org.example.quiz.quizDSL.impl,
+ org.example.quiz.quizDSL,
+ org.example.quiz.quizDSL.util,
+ org.example.quiz.generator,
+ org.example.quiz,
+ org.example.quiz.validation,
+ org.example.quiz.parser.antlr,
+ org.example.quiz.scoping,
+ org.example.quiz.serializer
+Import-Package: org.apache.log4j

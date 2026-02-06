@@ -1,0 +1,111 @@
+grammar org.example.quiz.QuizDSL with org.eclipse.xtext.common.Terminals
+
+generate quizDSL "http://www.example.org/quiz/QuizDSL"
+import "http://www.eclipse.org/emf/2002/Ecore" as ecore
+
+QuizGameSystem:
+    (themes+=Theme | users+=User | platform=QuizPlatform | results+=QuizResult)*;
+
+Theme:
+    'theme' name=ID
+        'primary' primaryColor=STRING
+        'secondary' secondaryColor=STRING
+        'bg' backgroundColor=STRING
+        'text' textColor=STRING
+        'font' fontName=STRING
+    'end';
+
+User:
+    'user' name=ID
+        'uid' username=STRING
+        'pwd' password=STRING
+        'name' fullName=STRING
+        (role=UserRole)?
+    'end';
+
+enum UserRole:
+    ADMIN = 'admin' | STUDENT = 'student';
+
+QuizPlatform:
+    'platform' name=ID
+        'title' title=STRING
+        'subtitle' subtitle=STRING
+        'logo' logo=STRING
+        'use_theme' theme=[Theme]
+        quizzes+=Quiz*
+    'end';
+
+Quiz:
+    'quiz' name=ID
+        'label' label=STRING
+        'desc' description=STRING
+        'icon' icon=STRING
+        config=QuizConfig
+        questions+=Question*
+    'end';
+
+QuizConfig:
+    {QuizConfig}
+    (access=AccessType)
+    ('time' duration=INT 'min')?
+    ('start' startTime=STRING)?
+    ('end' endTime=STRING)?
+    (shuffleQuestions?='shuffle')?
+    (showResult?='show_result')?
+    ('score' totalScore=INT)?;
+
+enum AccessType:
+    PUBLIC = 'public' | PRIVATE = 'private';
+
+Question:
+    SingleChoiceQuestion | MultipleChoiceQuestion | TrueFalseQuestion | DescriptiveQuestion;
+
+SingleChoiceQuestion:
+    'single_choice' name=ID
+        'text' text=STRING
+        ('val' score=INT)?
+        'options'
+            options+=Option+
+        'correct' correctOption=[Option]
+    'end';
+
+MultipleChoiceQuestion:
+    'multi_choice' name=ID
+        'text' text=STRING
+        ('val' score=INT)?
+        'options'
+            options+=Option+
+    'end';
+
+TrueFalseQuestion:
+    'true_false' name=ID
+        'text' text=STRING
+        ('val' score=INT)?
+        'answer' isTrue=EBoolean
+    'end';
+
+DescriptiveQuestion:
+    'descriptive' name=ID
+        'text' text=STRING
+        ('val' score=INT)?
+    'end';
+
+Option:
+    name=ID '->' text=STRING;
+
+EBoolean returns ecore::EBoolean:
+    'true' | 'false';
+
+QuizResult:
+    'result' name=ID
+        'user' user=[User]       
+        'quiz' quiz=[Quiz]       
+        'score' finalScore=INT   
+        'responses' '{' responses+=UserResponse+ '}'
+    'end';
+
+UserResponse:
+    'question' question=[Question] 
+    'provided_answer' answer=STRING 
+    'is_correct' correct=EBoolean
+;
