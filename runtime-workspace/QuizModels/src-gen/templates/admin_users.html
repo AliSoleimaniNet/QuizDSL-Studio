@@ -1,0 +1,120 @@
+{% extends 'admin_base.html' %}
+{% block admin_content %}
+<div class='space-y-6'>
+  <div class='flex justify-between items-center'>
+    <h2 class='text-2xl font-black' style='color: var(--text)'>مدیریت کاربران</h2>
+    <button onclick='openUserModal()' class='btn-primary px-6 py-3 rounded-2xl flex items-center gap-2'>
+      <i class='fa-solid fa-user-plus'></i> افزودن کاربر جدید
+    </button>
+  </div>
+
+  
+  <div class='glass rounded-[2.5rem] overflow-hidden border border-[var(--card-border)]'>
+    <table class='w-full text-right'>
+      <thead style='background: var(--card-bg)' class='text-xs opacity-50 uppercase'>
+        <tr><th class='p-6'>نام کامل</th><th class='p-6'>نام کاربری</th><th class='p-6'>نقش</th><th class='p-6 text-center'>عملیات</th></tr>
+      </thead>
+      <tbody class='divide-y divide-[var(--card-border)]' style='color: var(--text)'>
+        {% for u in users %}
+        <tr class='hover:bg-[var(--card-bg)] transition'>
+          <td class='p-6 font-bold'>{{ u.full_name }}</td>
+          <td class='p-6 font-mono text-sm opacity-60'>{{ u.username }}</td>
+          <td class='p-6'>
+            {% if u.role == 'admin' %}
+              <span class='px-4 py-1.5 rounded-full text-[10px] font-bold bg-purple-500/20 text-purple-400 border border-purple-500/30'>مدیر سیستم</span>
+            {% else %}
+              <span class='px-4 py-1.5 rounded-full text-[10px] font-bold bg-blue-500/20 text-blue-400 border border-blue-500/30'>دانشجو</span>
+            {% endif %}
+          </td>
+          <td class='p-6'>
+            <div class='flex justify-center gap-2'>
+              <button onclick='openUserModal({{ u.to_dict()|tojson|forceescape }})' 
+                      class='w-10 h-10 rounded-xl glass hover:bg-[var(--primary)] hover:text-white transition-all duration-300 flex items-center justify-center border border-[var(--card-border)]'>
+                <i class='fa-solid fa-pen-to-square'></i>
+              </button>
+              <button onclick='openDeleteModal({{ u.id }}, "{{ u.full_name }}")' 
+                      class='w-10 h-10 rounded-xl glass border border-[var(--card-border)] text-red-400 hover:bg-red-500 hover:text-white hover:shadow-[0_0_15px_rgba(239,68,68,0.4)] transition-all duration-300 flex items-center justify-center'>
+                <i class='fa-solid fa-trash-can text-xs'></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}
+{% block admin_modals %}
+<div id='modalLayer' class='fixed inset-0 z-[9999] hidden items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-fade-in'>
+  <div id='userModal' class='glass w-full max-w-md rounded-[3rem] shadow-2xl overflow-hidden hidden relative' style='background: var(--bg); border: 1px solid var(--card-border)'>
+    <button onclick='closeUserModal()' class='absolute top-8 left-8 transition-all text-2xl hover:text-red-500' style='color: var(--text-muted)'>&times;</button>
+    <form id='userForm' action='' method='POST' class='p-10'>
+      <h3 id='modalTitle' class='text-2xl font-black mb-8' style='color: var(--text)'>مدیریت کاربر</h3>
+      <div class='space-y-5'>
+        <div><label class='text-[10px] opacity-40 uppercase mr-2 mb-1 block font-bold'>نام کامل</label><input type='text' name='full_name' id='m_full_name' required class='w-full p-4 rounded-2xl outline-none border border-[var(--card-border)] transition-all focus:border-[var(--primary)]' style='background: var(--card-bg); color: var(--text)'></div>
+        <div><label class='text-[10px] opacity-40 uppercase mr-2 mb-1 block font-bold'>نام کاربری</label><input type='text' name='username' id='m_username' required class='w-full p-4 rounded-2xl outline-none border border-[var(--card-border)] transition-all focus:border-[var(--primary)]' style='background: var(--card-bg); color: var(--text)'></div>
+        <div><label class='text-[10px] opacity-40 uppercase mr-2 mb-1 block font-bold'>رمز عبور</label><input type='password' name='password' id='m_password' class='w-full p-4 rounded-2xl outline-none border border-[var(--card-border)] transition-all focus:border-[var(--primary)]' style='background: var(--card-bg); color: var(--text)'></div>
+        
+        
+        <div>
+          <label class='text-[10px] opacity-40 uppercase mr-2 mb-1 block font-bold'>نقش کاربری</label>
+          <div class='relative'>
+            <select name='role' id='m_role' class='w-full p-4 rounded-2xl outline-none border border-[var(--card-border)] appearance-none cursor-pointer transition-all focus:border-[var(--primary)]' 
+                    style='background: var(--card-bg); color: var(--text)'>
+              <option value='student' style='background: var(--bg); color: var(--text)'>دانشجو</option>
+              <option value='admin' style='background: var(--bg); color: var(--text)'>مدیر سیستم</option>
+            </select>
+            <div class='absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none opacity-40'><i class='fa-solid fa-chevron-down text-xs'></i></div>
+          </div>
+        </div>
+      </div>
+      <button type='submit' class='w-full btn-primary py-4 rounded-2xl mt-8 font-black shadow-xl shadow-[var(--primary)]/20 hover:scale-[1.02] transition-transform'>ذخیره تغییرات</button>
+    </form>
+  </div>
+  <div id='deleteModal' class='glass w-full max-w-xs rounded-[2.5rem] p-8 text-center hidden' style='background: var(--bg); border: 1px solid var(--card-border)'>
+    <div class='w-16 h-16 bg-red-500/20 text-red-500 rounded-2xl flex items-center justify-center mx-auto mb-4 text-2xl rotate-12'><i class='fa-solid fa-trash-alt'></i></div>
+    <h3 class='text-lg font-black mb-2' style='color: var(--text)'>حذف کاربر</h3>
+    <p class='text-sm opacity-50 mb-6'>آیا مطمئن هستید؟</p>
+    <div class='flex gap-3'>
+      <form id='deleteForm' method='POST' class='flex-grow'><button type='submit' class='w-full py-3 rounded-xl bg-red-500 text-white font-bold hover:bg-red-600 transition'>حذف</button></form>
+      <button type='button' onclick='closeDeleteModal()' class='flex-grow py-3 rounded-xl glass font-bold' style='color: var(--text)'>لغو</button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block admin_scripts %}
+<script>
+  function openUserModal(user = null) {
+    const layer = document.getElementById('modalLayer');
+    layer.classList.replace('hidden', 'flex');
+    document.getElementById('userModal').classList.remove('hidden');
+    if (user) {
+      document.getElementById('modalTitle').innerText = 'ویرایش پروفایل';
+      document.getElementById('userForm').action = '/admin/user/edit/' + user.id;
+      document.getElementById('m_full_name').value = user.full_name;
+      document.getElementById('m_username').value = user.username;
+      document.getElementById('m_role').value = user.role;
+    } else {
+      document.getElementById('modalTitle').innerText = 'افزودن کاربر جدید';
+      document.getElementById('userForm').action = '/admin/user/add';
+      document.getElementById('userForm').reset();
+    }
+  }
+  function closeUserModal() {
+    document.getElementById('modalLayer').classList.replace('flex', 'hidden');
+    document.getElementById('userModal').classList.add('hidden');
+  }
+  function openDeleteModal(id, name) {
+    document.getElementById('deleteForm').action = '/admin/user/delete/' + id;
+    document.getElementById('modalLayer').classList.replace('hidden', 'flex');
+    document.getElementById('deleteModal').classList.remove('hidden');
+  }
+  function closeDeleteModal() {
+    document.getElementById('modalLayer').classList.replace('flex', 'hidden');
+    document.getElementById('deleteModal').classList.add('hidden');
+  }
+</script>
+{% endblock %}

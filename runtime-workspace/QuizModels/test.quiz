@@ -1,0 +1,98 @@
+theme ModernDark
+    primary "#3B82F6"
+    secondary "#1D4ED8"
+    bg "#111827"
+    text "#F9FAFB"
+    font "Vazirmatn"
+end
+  
+theme ModernLight
+    primary "#2563EB"   
+    secondary "#7C3AED"  
+    bg "#F8FAFC"         
+    text "#0F172A"       
+    font "Vazirmatn"
+end
+
+user AdminAli
+    uid "ali"
+    pwd "password"
+    name "علی سلیمانی"
+    admin
+end
+
+user StudentZahra
+    uid "zahra"
+    pwd "123456"
+    name "زهرا حیدری"
+    student
+    
+end
+
+platform MyQuizApp
+    title "آکادمی دیجیتال ایران"
+    subtitle "مرکز تخصصی ارزیابی مهارت‌های برنامه‌نویسی و هوش مصنوعی"
+    logo "logo.png"
+    use_theme ModernDark
+  
+    quiz PythonBasics
+        label "برنامه‌نویسی پایتون (مقدماتی)"
+        desc "در این آزمون مفاهیم پایه پایتون شامل ساختارهای کنترلی و توابع ارزیابی می‌شود."
+        icon "python.png"
+        private
+        time 1 min
+        start "2026-02-05T02:00"
+        end "2026-02-06T02:09"
+        shuffle
+        show_result
+        score 100
+        
+        single_choice q1
+            text "کدام کلمه کلیدی برای تعریف تابع در پایتون استفاده می‌شود؟"
+            val 10
+            options
+                opt1 -> "func"
+                opt2 -> "def"
+                opt3 -> "function"
+            correct opt2
+        end
+
+        true_false q2
+            text "آیا پایتون یک زبان Case-Sensitive (حساس به حروف بزرگ و کوچک) است؟"
+            val 5
+            answer true
+        end
+
+        descriptive q3
+            text "تفاوت اصلی List و Tuple را بنویسید."
+            val 20
+        end
+    end
+
+    quiz DatabaseIntro
+        label "آشنایی با SQL"
+        desc "تست مفاهیم مقدماتی پایگاه داده‌های رابطه‌ای و کوئری‌های SELECT."
+        icon "database.png"
+        public
+        score 50 
+        
+        single_choice q4
+            text "کدام دستور برای حذف تمامی رکوردها از یک جدول بدون حذف ساختار آن استفاده می‌شود؟"
+            val 10
+            options
+                opt1 -> "DELETE"
+                opt2 -> "DROP"
+                opt3 -> "TRUNCATE"
+            correct opt3
+        end
+        
+        multi_choice q5
+        	text "این سوال تستی است؟"
+        	options
+        		opt1 -> "abc"
+        		opt2 -> "def"
+        		opt3 -> "qwe"
+        		opt4 -> "123"
+        	end
+    end
+end

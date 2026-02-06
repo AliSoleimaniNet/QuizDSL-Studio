@@ -18,3 +18,8 @@ release.properties
 Thumbs.db
 
 .recommenders/
+
+__pycache__/
+
+instance/
+config.json
