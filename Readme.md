@@ -62,10 +62,14 @@ The current implementation is pre-configured for **Persian (RTL)** environments.
 See the **QuizDSL Studio** in action: From AI prompting to automated DSL generation and web deployment.
 
 <p align="center">
-  <video src="assets/ModelManager.mp4" width="100%" controls autoplay loop muted>
+  <video src="https://github.com/user-attachments/assets/c59b8b4f-8094-432a-ba0d-de1ae39a4a7e" width="100%" controls autoplay loop muted>
     Your browser does not support the video tag.
   </video>
 </p>
+
+
+
+
 
 > 💡 **Visual Overview:** 
 > 1. **DSL-Generated Live Demo:** Watch how the DSL transforms into a functional website.
