@@ -62,7 +62,7 @@ The current implementation is pre-configured for **Persian (RTL)** environments.
 See the **QuizDSL Studio** in action: From AI prompting to automated DSL generation and web deployment.
 
 <p align="center">
-  <video src="assets/ModelManager.mp4" width="100%" controls autoplay loop muted>
+  <video src="./assets/ModelManager.mp4" width="100%" controls autoplay loop muted>
     Your browser does not support the video tag.
   </video>
 </p>
