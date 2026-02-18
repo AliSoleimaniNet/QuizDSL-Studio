@@ -1,0 +1,55 @@
+theme PythonHubTheme
+    primary "#3776AB"
+    secondary "#2E86C1"
+    bg "#F0F0F0"
+    text "#333333"
+    font "Vazirmatn"
+end
+
+user AdminPython uid "admin_python" pwd "python2024" name "مدیر پایتون" admin end
+
+platform PythonHub
+    title "پایتون هاب"
+    subtitle "مرکز سنجش دانش پایتون"
+    logo "python_logo.png"
+    use_theme PythonHubTheme
+
+    quiz PythonQuiz label "آزمون پایتون" desc "آزمون تخصصی پایتون" icon "python.png" private time 30 min score 20
+        single_choice PythonQuiz_q1 text "کدام عملگر برای اعضایگیری در لیست استفاده می‌شود؟" val 5
+            options
+                PythonQuiz_q1_o1 -> "()"
+                PythonQuiz_q1_o2 -> "[]"
+                PythonQuiz_q1_o3 -> "{}"
+            correct PythonQuiz_q1_o2
+        end
+        true_false PythonQuiz_q2 text "پایتون یک زبان کامپایلری است؟" val 5
+            answer false
+        end
+        single_choice PythonQuiz_q3 text "کدام نوع داده برای ذخیره متن استفاده می‌شود؟" val 5
+            options
+                PythonQuiz_q3_o1 -> "int"
+                PythonQuiz_q3_o2 -> "float"
+                PythonQuiz_q3_o3 -> "str"
+            correct PythonQuiz_q3_o3
+        end
+    end
+
+    quiz PythonSurvey label "نظرسنجی پایتون" desc "بازخورد کاربران" icon "survey.png" public time 10 min
+        multi_choice PythonSurvey_q1 text "کدام کتابخانه‌های پایتون را بیشتر استفاده می‌کنید؟"
+            options
+                PythonSurvey_q1_o1 -> "NumPy"
+                PythonSurvey_q1_o2 -> "Pandas"
+                PythonSurvey_q1_o3 -> "Matplotlib"
+                PythonSurvey_q1_o4 -> "Django"
+            end
+        descriptive PythonSurvey_q2 text "چه پیشنهادی برای بهبود آموزش پایتون دارید؟"
+        end
+        single_choice PythonSurvey_q3 text "سطح دانش پایتون شما چگونه است؟"
+            options
+                PythonSurvey_q3_o1 -> "مبتدی"
+                PythonSurvey_q3_o2 -> "متوسط"
+                PythonSurvey_q3_o3 -> "پیشرفته"
+            correct PythonSurvey_q3_o2
+        end
+    end
+end

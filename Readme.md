@@ -48,6 +48,32 @@ The project implements a 4-tier pipeline:
 
 ---
 
+### 🌍 Localization & Extensibility
+The current implementation is pre-configured for **Persian (RTL)** environments. While it's not a "one-click" setting yet, the framework is architecturally ready for global use:
+
+* **AI Adaptability:** To switch languages, the `Modelfile` can be edited to retrain the LLM's prompting logic for English DSL generation.
+* **Code Generation:** The **Xtend Transformer** code is modular, allowing developers to modify the templates to generate **LTR** layouts and English UI components.
+* **Customization:** By editing the core generator logic and the AI blueprints, the entire pipeline can be repurposed for any language or regional requirement.
+
+---
+
+## 🎥 Live Demo
+
+See the **QuizDSL Studio** in action: From AI prompting to automated DSL generation and web deployment.
+
+<p align="center">
+  <video src="assets/ModelManager.mp4" width="100%" controls autoplay loop muted>
+    Your browser does not support the video tag.
+  </video>
+</p>
+
+> 💡 **Visual Overview:** 
+> 1. **DSL-Generated Live Demo:** Watch how the DSL transforms into a functional website.
+> 2. **Live Monitoring & Process Control:** Real-time logs and easy build management.
+> 3. **Another Perspective:** Switching between different generated models seamlessly.
+
+---
+
 ## 📊 Metamodel & Grammar
 
 The language is formally defined using an Ecore metamodel. You can find the visual representation here:

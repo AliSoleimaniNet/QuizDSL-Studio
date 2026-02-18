@@ -1,0 +1,138 @@
+{% extends 'admin_base.html' %}
+{% block admin_content %}
+<div class='space-y-6 animate-fade-in'>
+    <div class='flex justify-between items-center mb-8'>
+        <div class='text-right'>
+            <h2 class='text-2xl font-black' style='color: var(--text)'>نتایج و پاسخنامه‌ها</h2>
+            <p class='text-sm opacity-50' style='color: var(--text)'>بررسی دقیق عملکرد و تصحیح پاسخنامه‌های شرکت‌کنندگان</p>
+        </div>
+        <div class='w-12 h-12 rounded-2xl bg-[var(--primary)]/10 flex items-center justify-center text-[var(--primary)]'>
+            <i class='fa-solid fa-poll-h text-2xl'></i>
+        </div>
+    </div>
+    <div class='glass rounded-[2.5rem] overflow-hidden border border-[var(--card-border)] bg-[var(--card-bg)]'>
+        <table class='w-full text-right border-collapse'>
+            <thead class='text-xs uppercase tracking-wider' style='background: var(--nav-bg); color: var(--text-muted)'>
+                <tr>
+                    <th class='p-6'>شرکت‌کننده</th>
+                    <th class='p-6'>عنوان آزمون</th>
+                    <th class='p-6 text-center'>نمره نهایی</th>
+                    <th class='p-6 text-center'>وضعیت</th>
+                    <th class='p-6 text-center'>عملیات</th>
+                </tr>
+            </thead>
+            <tbody class='divide-y divide-[var(--card-border)]' style='color: var(--text)'>
+                {% for res in all_results %}
+                <tr class='hover:bg-[var(--primary)]/5 transition-colors group'>
+                    <td class='p-6'>
+                        <div class='font-bold'>{{ res.user_full_name }}</div>
+                        <div class='text-[10px] opacity-40 font-mono text-[var(--text-muted)]'>ID: {{ res.user_id }}</div>
+                    </td>
+                    <td class='p-6'>
+                        <div class='font-medium'>{{ res.quiz_name }}</div>
+                        <div class='text-[10px] opacity-40 uppercase'>{{ res.quiz_id }}</div>
+                    </td>
+                    <td class='p-6 text-center'>
+                        <span class='font-black text-[var(--primary)]'>{{ res.finalScore }}</span>
+                        <span class='text-xs opacity-30'> / {{ res.maxScore }}</span>
+                    </td>
+                    <td class='p-6 text-center'>
+                        <div class='text-[10px] px-3 py-1 rounded-full border inline-block' 
+                             style='border-color: var(--card-border); background: var(--bg)'>
+                             {{ (res.finalScore / res.maxScore * 100)|round|int }}%
+                        </div>
+                    </td>
+                    <td class='p-6'>
+                        <button onclick='openAdminResultModal({{ res.id }})' 
+                                class='mx-auto w-10 h-10 rounded-xl glass border border-[var(--card-border)] flex items-center justify-center hover:bg-[var(--primary)] hover:text-white transition-all'>
+                            <i class='fa-solid fa-eye text-sm'></i>
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+<div id='adminResultModal' class='fixed inset-0 z-[9999] hidden flex items-center justify-center p-4 bg-[var(--bg)]/90 backdrop-blur-md animate-fade-in'>
+    <div class='w-full max-w-2xl max-h-[85vh] overflow-hidden rounded-[3rem] border border-[var(--card-border)] flex flex-col shadow-2xl' style='background: var(--nav-bg)'>
+        <div class='p-6 border-b border-[var(--card-border)] flex justify-between items-center bg-[var(--text)]/5'>
+            <button onclick='closeAdminModal()' class='w-10 h-10 rounded-xl hover:bg-red-500/20 hover:text-red-500 transition-all text-2xl' style='color: var(--text-muted)'>&times;</button>
+            <h3 class='text-lg font-black' style='color: var(--text)'>بررسی پاسخنامه کاربر</h3>
+        </div>
+        <div id='adminModalContent' class='p-8 overflow-y-auto flex-1 text-right scrollbar-hide'>
+        </div>
+        <div class='p-6 border-t border-[var(--card-border)] flex justify-between items-center bg-[var(--text)]/5'>
+            <button id='admNext' class='px-8 py-3 rounded-2xl btn-primary text-sm font-bold active:scale-95 transition-transform'>سوال بعدی</button>
+            <div id='admStep' class='text-xs font-mono px-4 py-2 rounded-full border border-[var(--card-border)]' style='color: var(--text-muted); background: var(--bg)'></div>
+            <button id='admPrev' class='px-8 py-3 rounded-2xl glass border border-[var(--card-border)] text-[var(--text)] text-sm font-bold transition-all'>قبلی</button>
+        </div>
+    </div>
+</div>
+<script>
+let admResponses = []; let admIndex = 0;
+function openAdminResultModal(resultId) {
+    fetch(`/api/result/${resultId}`).then(r => r.json()).then(data => {
+        admResponses = data.responses;
+        admIndex = 0;
+        document.getElementById('adminResultModal').classList.replace('hidden', 'flex');
+        document.body.style.overflow = 'hidden';
+        renderAdminResponse();
+    });
+}
+function renderAdminResponse() {
+    const resp = admResponses[admIndex];
+    let scoreStatus = '';
+    let indicatorClass = 'border-[var(--card-border)] bg-[var(--bg)]/50';
+    let icon = '<i class="fa-solid fa-circle-info"></i>';
+    if (resp.max_q_score > 0) {
+        if (resp.correct === true) {
+            scoreStatus = `صحیح | نمره: ${resp.earned_q_score} از ${resp.max_q_score}`;
+            indicatorClass = 'border-green-500/40 bg-green-500/10 text-green-500';
+            icon = '<i class="fa-solid fa-circle-check"></i>';
+        } else if (resp.correct === false) {
+            scoreStatus = `غلط | نمره: 0 از ${resp.max_q_score}`;
+            indicatorClass = 'border-red-500/40 bg-red-500/10 text-red-500';
+            icon = '<i class="fa-solid fa-circle-xmark"></i>';
+        } else {
+            scoreStatus = `نیاز به تصحیح دستی | بارم: ${resp.max_q_score}`;
+            indicatorClass = 'border-yellow-500/40 bg-yellow-500/10 text-yellow-500';
+            icon = '<i class="fa-solid fa-circle-question"></i>';
+        }
+    } else {
+        scoreStatus = 'سوال بدون نمره (نظرسنجی/توضیحی)';
+    }
+    const container = document.getElementById('adminModalContent');
+    container.innerHTML = `
+        <div class='animate-fade-in'>
+            <div class='mb-6'>
+                <span class='text-[var(--primary)] text-[10px] font-black uppercase tracking-widest block mb-2 opacity-70'>پرسش ${admIndex + 1}</span>
+                <h3 class='text-xl font-bold leading-relaxed' style='color: var(--text)'>${resp.question_text}</h3>
+            </div>
+            <div class='p-6 rounded-[2rem] border border-[var(--card-border)] mb-6' style='background: var(--bg)'>
+                <div class='text-[10px] opacity-40 mb-2 uppercase' style='color: var(--text)'>پاسخ ثبت شده کاربر:</div>
+                <div class='text-lg font-medium' style='color: var(--text)'>${resp.answer || '<span class="opacity-20 italic">بدون پاسخ</span>'}</div>
+            </div>
+            <div class='p-4 rounded-2xl border ${indicatorClass} flex items-center gap-3 transition-all duration-300'>
+                <span class='text-xl'>${icon}</span>
+                <span class='text-sm font-bold'>${scoreStatus}</span>
+            </div>
+        </div>
+    `;
+    document.getElementById('admStep').innerText = `${admIndex + 1} / ${admResponses.length}`;
+    const prevBtn = document.getElementById('admPrev');
+    prevBtn.disabled = admIndex === 0;
+    prevBtn.style.opacity = admIndex === 0 ? '0.3' : '1';
+    document.getElementById('admNext').innerText = admIndex === admResponses.length - 1 ? 'بستن' : 'سوال بعدی';
+    document.getElementById('admPrev').onclick = () => { if(admIndex > 0) { admIndex--; renderAdminResponse(); } };
+    document.getElementById('admNext').onclick = () => {
+        if(admIndex < admResponses.length - 1) { admIndex++; renderAdminResponse(); }
+        else { closeAdminModal(); }
+    };
+}
+function closeAdminModal() {
+    document.getElementById('adminResultModal').classList.replace('flex', 'hidden');
+    document.body.style.overflow = 'auto';
+}
+</script>
+{% endblock %}

@@ -1,0 +1,50 @@
+theme DarkJavaTheme
+    primary "#2ecc71"
+    secondary "#3498db"
+    bg "#2c3e50"
+    text "#ecf0f1"
+    font "Roboto"
+end
+
+user AliSoleimani
+    uid "ali_admin"
+    pwd "PassWord"
+    name "Ali Soleimani"
+    admin
+end
+
+platform JavaHub
+    title "Java Hub"
+    subtitle "Java Test Platform"
+    logo "java_logo.png"
+    use_theme DarkJavaTheme
+
+    quiz JavaBasics
+        label "Java Basics Quiz"
+        desc "Test your Java fundamentals"
+        icon "java_icon.png"
+        public
+        time 15 min
+        shuffle
+        show_result
+        score 10
+
+        single_choice JavaBasics_q1 text "What is the main method in Java?" val 2
+            options
+                JavaBasics_q1_o1 -> "public static void main(String[] args)"
+                JavaBasics_q1_o2 -> "public static String main()"
+            correct JavaBasics_q1_o1
+        end
+
+        true_false JavaBasics_q2 text "Java is a compiled language." val 2
+            answer true
+        end
+
+        single_choice JavaBasics_q3 text "Which keyword is used to create an object in Java?" val 2
+            options
+                JavaBasics_q3_o1 -> "new"
+                JavaBasics_q3_o2 -> "create"
+            correct JavaBasics_q3_o1
+        end
+    end
+end

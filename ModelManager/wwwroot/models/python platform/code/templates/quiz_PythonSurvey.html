@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class='max-w-4xl mx-auto'>
+  <div class='flex justify-between items-end mb-8'>
+    <div><h1 class='text-4xl font-black mb-2' style='color: var(--text)'>نظرسنجی پایتون</h1>
+    <p class='opacity-60'>بازخورد کاربران</p></div>
+    <div id='timer-box' class='glass p-4 rounded-3xl border border-[var(--card-border)] text-center min-w-[120px]'>
+      <p id='timer' class='text-2xl font-mono font-bold text-[var(--primary)]'>10:00</p></div>
+  </div>
+  <div class='w-full h-2 bg-[var(--card-bg)] rounded-full mb-12 overflow-hidden'>
+    <div id='progress-bar' class='h-full bg-[var(--primary)] transition-all duration-500 shadow-[0_0_15px_var(--primary)]' style='width: 0%'></div>
+  </div>
+  <form id='quiz-form' method='POST'>
+    <div id='questions-container'>
+      <div class='question-step hidden' data-logic-index='0'>
+        <div class='glass p-10 rounded-[3rem] border border-[var(--card-border)] mb-8'>
+          <span class='text-[var(--primary)] font-bold mb-4 block step-counter'>سوال شماره ...</span>
+          <h2 class='text-2xl font-bold mb-8' style='color: var(--text)'>کدام کتابخانه‌های پایتون را بیشتر استفاده می‌کنید؟</h2>
+          <label class='flex items-center gap-4 p-5 rounded-2xl border border-[var(--card-border)] mb-3 cursor-pointer hover:bg-[var(--primary)]/10 transition-all'>
+            <input type='checkbox' name='PythonSurvey_q1[]' value='PythonSurvey_q1_o1' class='w-5 h-5 rounded-md accent-[var(--primary)]'>
+            <span>NumPy</span></label>
+          <label class='flex items-center gap-4 p-5 rounded-2xl border border-[var(--card-border)] mb-3 cursor-pointer hover:bg-[var(--primary)]/10 transition-all'>
+            <input type='checkbox' name='PythonSurvey_q1[]' value='PythonSurvey_q1_o2' class='w-5 h-5 rounded-md accent-[var(--primary)]'>
+            <span>Pandas</span></label>
+          <label class='flex items-center gap-4 p-5 rounded-2xl border border-[var(--card-border)] mb-3 cursor-pointer hover:bg-[var(--primary)]/10 transition-all'>
+            <input type='checkbox' name='PythonSurvey_q1[]' value='PythonSurvey_q1_o3' class='w-5 h-5 rounded-md accent-[var(--primary)]'>
+            <span>Matplotlib</span></label>
+          <label class='flex items-center gap-4 p-5 rounded-2xl border border-[var(--card-border)] mb-3 cursor-pointer hover:bg-[var(--primary)]/10 transition-all'>
+            <input type='checkbox' name='PythonSurvey_q1[]' value='PythonSurvey_q1_o4' class='w-5 h-5 rounded-md accent-[var(--primary)]'>
+            <span>Django</span></label>
+        </div>
+        <div class='flex justify-between items-center px-4'>
+          <button type='button' class='prev-btn px-8 py-3 rounded-xl glass border border-[var(--card-border)] opacity-0 pointer-events-none'>قبلی</button>
+          <button type='button' class='next-btn px-10 py-4 rounded-2xl btn-primary'>بعدی</button>
+          <button type='submit' class='submit-btn hidden px-10 py-4 rounded-2xl bg-green-500 text-white font-black'>ثبت نهایی</button>
+        </div>
+      </div>
+      <div class='question-step hidden' data-logic-index='1'>
+        <div class='glass p-10 rounded-[3rem] border border-[var(--card-border)] mb-8'>
+          <span class='text-[var(--primary)] font-bold mb-4 block step-counter'>سوال شماره ...</span>
+          <h2 class='text-2xl font-bold mb-8' style='color: var(--text)'>چه پیشنهادی برای بهبود آموزش پایتون دارید؟</h2>
+          <textarea name='PythonSurvey_q2' rows='5' class='w-full p-6 rounded-3xl border border-[var(--card-border)] bg-[var(--card-bg)] text-white outline-none focus:border-[var(--primary)]'></textarea>
+        </div>
+        <div class='flex justify-between items-center px-4'>
+          <button type='button' class='prev-btn px-8 py-3 rounded-xl glass border border-[var(--card-border)] opacity-0 pointer-events-none'>قبلی</button>
+          <button type='button' class='next-btn px-10 py-4 rounded-2xl btn-primary'>بعدی</button>
+          <button type='submit' class='submit-btn hidden px-10 py-4 rounded-2xl bg-green-500 text-white font-black'>ثبت نهایی</button>
+        </div>
+      </div>
+      <div class='question-step hidden' data-logic-index='2'>
+        <div class='glass p-10 rounded-[3rem] border border-[var(--card-border)] mb-8'>
+          <span class='text-[var(--primary)] font-bold mb-4 block step-counter'>سوال شماره ...</span>
+          <h2 class='text-2xl font-bold mb-8' style='color: var(--text)'>سطح دانش پایتون شما چگونه است؟</h2>
+          <label class='flex items-center gap-4 p-5 rounded-2xl border border-[var(--card-border)] mb-3 cursor-pointer hover:bg-[var(--primary)]/10 transition-all'>
+            <input type='radio' name='PythonSurvey_q3' value='PythonSurvey_q3_o1' class='w-5 h-5 accent-[var(--primary)]'>
+            <span>مبتدی</span></label>
+          <label class='flex items-center gap-4 p-5 rounded-2xl border border-[var(--card-border)] mb-3 cursor-pointer hover:bg-[var(--primary)]/10 transition-all'>
+            <input type='radio' name='PythonSurvey_q3' value='PythonSurvey_q3_o2' class='w-5 h-5 accent-[var(--primary)]'>
+            <span>متوسط</span></label>
+          <label class='flex items-center gap-4 p-5 rounded-2xl border border-[var(--card-border)] mb-3 cursor-pointer hover:bg-[var(--primary)]/10 transition-all'>
+            <input type='radio' name='PythonSurvey_q3' value='PythonSurvey_q3_o3' class='w-5 h-5 accent-[var(--primary)]'>
+            <span>پیشرفته</span></label>
+        </div>
+        <div class='flex justify-between items-center px-4'>
+          <button type='button' class='prev-btn px-8 py-3 rounded-xl glass border border-[var(--card-border)] opacity-0 pointer-events-none'>قبلی</button>
+          <button type='button' class='next-btn px-10 py-4 rounded-2xl btn-primary'>بعدی</button>
+          <button type='submit' class='submit-btn hidden px-10 py-4 rounded-2xl bg-green-500 text-white font-black'>ثبت نهایی</button>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+<script>
+  const container = document.getElementById('questions-container');
+  const steps = Array.from(container.getElementsByClassName('question-step'));
+  let currentStep = 0;
+  const totalSteps = steps.length;
+  function renderStep() {
+    steps.forEach((s, i) => {
+      s.classList.add('hidden');
+      if(i === currentStep) {
+        s.classList.remove('hidden');
+        s.querySelector('.step-counter').innerText = `سوال شماره ${i+1} از ${totalSteps}`;
+        const pBtn = s.querySelector('.prev-btn');
+        const nBtn = s.querySelector('.next-btn');
+        const sBtn = s.querySelector('.submit-btn');
+        if(i > 0) { pBtn.classList.replace('opacity-0', 'opacity-100'); pBtn.classList.remove('pointer-events-none'); pBtn.onclick = () => { currentStep--; renderStep(); }; }
+        if(i === totalSteps - 1) { nBtn.classList.add('hidden'); sBtn.classList.remove('hidden'); }
+        else { nBtn.classList.remove('hidden'); sBtn.classList.add('hidden'); nBtn.onclick = () => { currentStep++; renderStep(); }; }
+      }
+    });
+    document.getElementById('progress-bar').style.width = (currentStep / totalSteps * 100) + '%';
+  }
+  renderStep();
+  let timeLeft = 600;
+  const timerInterval = setInterval(() => {
+    timeLeft--;
+    const mins = Math.floor(timeLeft / 60); const secs = timeLeft % 60;
+    document.getElementById('timer').innerText = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+    if (timeLeft <= 10) { document.getElementById('timer-box').classList.add('animate-pulse', 'border-red-500'); }
+    if (timeLeft <= 0) { clearInterval(timerInterval); document.getElementById('quiz-form').submit(); }
+  }, 1000);
+</script>
+{% endblock %}
